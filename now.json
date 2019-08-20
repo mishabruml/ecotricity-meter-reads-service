@@ -2,6 +2,6 @@
   "name": "ecotricity-meter-reads-service",
   "version": 2,
   "env": {
-    "PROD-DB-URI": "@prod-db-uri"
+    "PROD_DB_URI": "@prod-db-uri"
   }
 }

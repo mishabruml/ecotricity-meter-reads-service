@@ -18,5 +18,8 @@
   "bugs": {
     "url": "https://github.com/mishabruml/ecotricity-meter-reads-service/issues"
   },
-  "homepage": "https://github.com/mishabruml/ecotricity-meter-reads-service#readme"
+  "homepage": "https://github.com/mishabruml/ecotricity-meter-reads-service#readme",
+  "dependencies": {
+    "mongoose": "^5.6.9"
+  }
 }

@@ -1,4 +1,4 @@
-module.exports = (req, res) => {
+module.exports = async (req, res) => {
   const { name = "world" } = req.query;
   res.status(200).send(`Hello ${name}!`);
 };
