@@ -1,0 +1,22 @@
+{
+  "name": "ecotricity-meter-reads-service",
+  "version": "1.0.0",
+  "description": "Ecotricity demo API for accepting and presenting customer meter readings",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mishabruml/ecotricity-meter-reads-service.git"
+  },
+  "keywords": [
+    "ecotricity"
+  ],
+  "author": "Misha Bruml",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mishabruml/ecotricity-meter-reads-service/issues"
+  },
+  "homepage": "https://github.com/mishabruml/ecotricity-meter-reads-service#readme"
+}
