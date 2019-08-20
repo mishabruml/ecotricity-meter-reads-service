@@ -1,4 +1,7 @@
 {
   "name": "ecotricity-meter-reads-service",
-  "version": 2
+  "version": 2,
+  "env": {
+    "PROD-DB-URI": "@prod-db-uri"
+  }
 }
