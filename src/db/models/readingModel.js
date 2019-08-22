@@ -1,17 +1,17 @@
 const mongoose = require("mongoose");
 
 const readingSchema = new mongoose.Schema({
-  customerId: { type: String, required: true },
+  customerId: { type: String, required: true, index: true },
   serialNumber: { type: Number, required: true },
   mpxn: { type: String, required: true },
   read: [
-    {
-      // prettier-ignore
-      "type": {type:String, enum: ["NIGHT", "ANYTIME"]}, // 'type' is a keyword in mongoose, that's why this looks wierd
-      registerId: String,
-      value: Number
-    }
+    // sub-document schema
+    new mongoose.Schema(
+      { type: String, registerId: String, value: String },
+      { _id: false, required: true }
+    )
   ],
+
   readDate: { type: Date, required: true }
 });
 
