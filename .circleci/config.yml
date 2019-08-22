@@ -34,4 +34,4 @@ jobs:
 
       # upload coverage report to codecov using circleci orb... yeaa!
       - codecov/upload:
-          file: { { coverage.lcov } }
+          file: { { coverage_report_filepath } }
