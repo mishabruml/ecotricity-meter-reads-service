@@ -3,5 +3,17 @@
   "version": 2,
   "env": {
     "PROD_DB_URI": "@prod-db-uri"
-  }
+  },
+  "routes": [
+    {
+      "src": "/meter-read",
+      "methods": ["GET"],
+      "dest": "/api/meter-read/get.js"
+    },
+    {
+      "src": "/meter-read",
+      "methods": ["POST"],
+      "dest": "/api/meter-read/post.js"
+    }
+  ]
 }

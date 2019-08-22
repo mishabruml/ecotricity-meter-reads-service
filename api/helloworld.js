@@ -10,6 +10,7 @@ module.exports = async (req, res) => {
     res.status(200).send(`Hello ${name}!`);
   } catch (err) {
     console.error(err);
+    await mongoose.disconnect();
     res.status(500).send("Server error");
   }
 };
