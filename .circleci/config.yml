@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      # specify the version you desire here
+      # specify the docker version you desire here
       - image: circleci/node:7.10
 
     working_directory: ~/repo
@@ -24,5 +24,12 @@ jobs:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
 
-      # run tests!
-      - run: npm test
+      # Run tests
+      - run:
+          name: run tests with coverage reports
+          command: npm run test-coverage
+
+      # Upload coverage report to codecov
+      - run:
+          name: upload test reports to codecov
+          command: npm run report-coverage
