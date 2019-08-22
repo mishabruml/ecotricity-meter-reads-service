@@ -28,7 +28,7 @@ jobs:
 
       - run:
           name: run tests with coverage reports
-          command: npm run report-coverage
+          command: npm run test-coverage
 
       - run:
           name: show all files
