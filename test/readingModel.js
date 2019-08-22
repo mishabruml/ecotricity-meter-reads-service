@@ -1,5 +1,5 @@
 const { expect } = require("chai");
-const ReadingModel = require("../src/db/models/ReadingModel");
+const ReadingModel = require("../src/db/models/readingModel");
 const generateRandomReading = require("./util/generateRandomReading");
 
 describe("reading schema", () => {
