@@ -4,7 +4,9 @@
   "description": "Ecotricity demo API for accepting and presenting customer meter readings",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha",
+    "test-coverage": "nyc npm test",
+    "report-coverage": "nyc report --reporter=text-lcov > coverage.lcov && codecov"
   },
   "repository": {
     "type": "git",
@@ -21,5 +23,10 @@
   "homepage": "https://github.com/mishabruml/ecotricity-meter-reads-service#readme",
   "dependencies": {
     "mongoose": "^5.6.9"
+  },
+  "devDependencies": {
+    "codecov": "^3.5.0",
+    "mocha": "^6.2.0",
+    "nyc": "^14.1.1"
   }
 }
