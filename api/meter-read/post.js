@@ -6,7 +6,7 @@ module.exports = async (req, res) => {
     console.log(req.method);
     console.log(req.body);
     res.send("posted reading ok");
-  } catch (e) {
+  } catch (err) {
     console.error(err);
     res.status(500).send("Server error");
   } finally {
