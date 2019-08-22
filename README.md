@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/mishabruml/ecotricity-meter-reads-service.svg?style=svg)](https://circleci.com/gh/mishabruml/ecotricity-meter-reads-service)
+[![CircleCI](https://circleci.com/gh/mishabruml/ecotricity-meter-reads-service.svg?style=svg&circle-token=03ec99b9a671f59b392d863289ff811e2e995b61)](https://circleci.com/gh/mishabruml/ecotricity-meter-reads-service)
 [![codecov](https://codecov.io/gh/mishabruml/ecotricity-meter-reads-service/branch/master/graph/badge.svg?token=8MMOKrNLn0)](https://codecov.io/gh/mishabruml/ecotricity-meter-reads-service)
 
 # ecotricity-meter-reads-service
@@ -40,8 +40,7 @@ Seems like they uniquely identify a utility SUPPLY but not meter.
 > These numbers (MPAN for electricity, MPRN for gas) are unique to your electricity and gas supply and identify you within the electricity and gas industry. This isn’t the same as your **meter serial numbers**, which are printed on your meters.
 > https://www.ecotricity.co.uk/customer-service/pay-your-bill/your-bill-explained/your-electricity-and-gas-bill-explained
 
-> How is \[serial number\] different to a supply number? The supply number (your MPRN or MPAN) is a reference point for the **property** where the meter is located. It's the point where we put the meter, not the meter itself. When a meter is replaced, the serial number will be different. **The supply number always stays the same.**
-> https://help.bulb.co.uk/hc/en-us/articles/115001228451-What-is-a-meter-serial-number-
+> How is \[serial number\] different to a supply number? The supply number (your MPRN or MPAN) is a reference point for the **property** where the meter is located. It's the point where we put the meter, not the meter itself. When a meter is replaced, the serial number will be different. **The supply number always stays the same.** > https://help.bulb.co.uk/hc/en-us/articles/115001228451-What-is-a-meter-serial-number-
 
 #### Register ID
 
