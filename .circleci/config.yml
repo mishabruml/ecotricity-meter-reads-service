@@ -29,6 +29,9 @@ jobs:
       # run tests with coverage
       - run: npm run report-coverage
 
+      # show all files
+      - run: ls -a
+
       # upload coverage report to codecov using circleci orb... yeaa!
       - codecov/upload:
           file: { { coverage.lcov } }
