@@ -1,4 +1,6 @@
 version: 2
+orbs:
+  codecov: codecov/codecov@1.0.2
 jobs:
   build:
     docker:
@@ -24,5 +26,9 @@ jobs:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
 
-      # run tests!
-      - run: npm test
+      # run tests with coverage
+      - run: npm run report-coverage
+
+      # upload coverage report to codecov using circleci orb... yeaa!
+      - codecov/upload:
+          file: { { coverage.lcov } }
