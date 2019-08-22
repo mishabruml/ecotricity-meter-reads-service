@@ -27,12 +27,12 @@ jobs:
           key: v1-dependencies-{{ checksum "package.json" }}
 
       - run:
-        name: run tests with coverage reports
-        command: npm run report-coverage
+          name: run tests with coverage reports
+          command: npm run report-coverage
 
       - run:
-        name: show all files
-        command: ls -a
+          name: show all files
+          command: ls -a
 
       # upload coverage report to codecov using circleci orb... yeaa!
       - codecov/upload:
