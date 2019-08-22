@@ -1,3 +1,4 @@
+[![codecov](https://codecov.io/gh/mishabruml/ecotricity-meter-reads-service/branch/master/graph/badge.svg?token=8MMOKrNLn0)](https://codecov.io/gh/mishabruml/ecotricity-meter-reads-service)
 # ecotricity-meter-reads-service
 Ecotricity meter reads service! An API to accept/present customer's electricity meter readings. 
 
