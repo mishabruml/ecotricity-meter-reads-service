@@ -1,14 +1,4 @@
-// Custom error class
-
-// function ItemAlreadyExistsError(item, itemType) {
-//   Error.captureStackTrace(this);
-//   this.name = "ItemAlreadyExistsError";
-//   this.item = item;
-//   this.itemType = itemType;
-//   this.message = `The ${itemType ? itemType : "item"} already exists`;
-// }
-// ItemAlreadyExistsError.prototype = Object.create(Error.prototype);
-// module.exports.ItemAlreadyExistsError = ItemAlreadyExistsError;
+// Custom error classes
 
 class MissingParameterError extends Error {
   constructor(...args) {

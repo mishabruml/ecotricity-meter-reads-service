@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+mongoose.set("useCreateIndex", true);
 
 // "sub" schema for the reads sub-document
 const readSchema = new mongoose.Schema(

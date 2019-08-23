@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const validatePost = require("../../src/util/validate");
+const validatePostBody = require("../../src/util/validatePostBody");
 const {
   MissingParameterError,
   InvalidDataError
@@ -10,9 +10,13 @@ const ReadingModel = require("../../src/db/models/readingModel");
 module.exports = async (req, res) => {
   try {
     await mongoose.connect(process.env.PROD_DB_URI, { useNewUrlParser: true });
-    if (!req.body) throw new MissingParameterError("body");
-    console.log(req.body);
-    validatePost(req.body);
+    let body;
+    try {
+      body = req.body;
+    } catch (e) {
+      throw new MissingParameterError("body");
+    }
+    validatePostBody(body);
     res.send("posted reading ok");
   } catch (err) {
     console.error(err);
