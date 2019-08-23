@@ -4,11 +4,15 @@ const {
   CUSTOMER_ID_UUID_VERSION,
   SERIAL_NUMBER_LENGTH,
   MPXN_LENGTH,
-  REQUIRED_READ_TYPES
+  REQUIRED_READ_TYPES,
+  REGISTER_ID_LENGTH,
+  READ_VALUE_MIN,
+  READ_VALUE_MAX,
+  READ_VALUE_ALLOW_LEADING_ZEROS
 } = require("../lib/constants");
 
 const { expect } = require("chai");
-const _ = require("a");
+const _ = require("lodash");
 
 const validator = require("validator");
 
@@ -46,27 +50,74 @@ const validatePostBody = body => {
       `mpxn must be a ${MPXN_LENGTH}-character number`
     );
   }
-  if (!Array.isArray(read))
-    throw new InvalidDataError("'read' must be an object array");
 
-  if (read.length !== REQUIRED_READ_TYPES.length) {
-    throw new InvalidDataError(
-      `'read' must have ${REQUIRED_READ_TYPES.length} entries`
-    );
-  }
+  const validateRead = read => {
+    if (!Array.isArray(read))
+      throw new InvalidDataError("'read' must be an object array");
 
-  const readTypes = read.map(reading => {
-    return reading.type;
-  });
-
-  console.log(readTypes.sort() === REQUIRED_READ_TYPES.sort());
-
-  read.forEach(reading => {
-    if (REQUIRED_READ_TYPES.indexOf(reading.type) === -1)
+    if (read.length !== REQUIRED_READ_TYPES.length) {
       throw new InvalidDataError(
-        `'read' allowed types are ${REQUIRED_READ_TYPES.toString()}`
+        `'read' must have ${REQUIRED_READ_TYPES.length} entries`
       );
-  });
+    }
+
+    read.forEach(reading => {
+      try {
+        expect(reading).to.have.keys("type", "registerId", "value");
+      } catch (e) {
+        console.error(e);
+        const missingReadParams = e.expected
+          .filter(x => !e.actual.includes(x))
+          .join();
+        throw new MissingParameterError(
+          `'read' missing key(s): '${missingReadParams}'`
+        );
+      }
+    });
+
+    const readTypes = read.map(reading => {
+      return reading.type;
+    });
+    if (!_.isEqual(readTypes.sort(), REQUIRED_READ_TYPES.sort()))
+      throw new InvalidDataError(
+        `'read' required types are ${REQUIRED_READ_TYPES.toString()}`
+      );
+
+    const registerIds = read.map(reading => {
+      return reading.registerId;
+    });
+
+    registerIds.forEach(registerId => {
+      if (
+        !validator.isAlphanumeric(registerId) ||
+        registerId.length !== REGISTER_ID_LENGTH
+      )
+        throw new InvalidDataError(
+          `registerId must be ${REGISTER_ID_LENGTH}-characater alphanumeric`
+        );
+    });
+
+    const readValues = read.map(reading => {
+      return reading.value;
+    });
+
+    readValues.forEach(value => {
+      if (
+        !validator.isInt(value, {
+          min: READ_VALUE_MIN,
+          max: READ_VALUE_MAX,
+          allow_leading_zeroes: READ_VALUE_ALLOW_LEADING_ZEROS
+        })
+      )
+        throw new InvalidDataError(
+          `'read' values must be integer between ${READ_VALUE_MIN} and ${READ_VALUE_MAX}. Leading zeros ${
+            READ_VALUE_ALLOW_LEADING_ZEROS ? "are" : "not"
+          } permitted`
+        );
+    });
+  };
+
+  validateRead(read);
 };
 
 module.exports = validatePostBody;

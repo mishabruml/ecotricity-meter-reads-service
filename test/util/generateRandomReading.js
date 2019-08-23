@@ -11,12 +11,12 @@ const generateRandomReading = () => {
     {
       type: "ANYTIME",
       registerId: registerId,
-      value: chance.natural({ min: 1, max: 9999 })
+      value: chance.natural({ min: 0, max: 9999 })
     },
     {
       type: "NIGHT",
       registerId: registerId,
-      value: chance.natural({ min: 1, max: 9999 })
+      value: chance.natural({ min: 0, max: 9999 })
     }
   ];
   const nowMs = new Date().getTime();
