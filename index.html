@@ -1,12 +1,30 @@
 <!DOCTYPE html>
 <html>
   <head>
+<style>
+    body {
+      background-color: #99CC33;
+    }
+    
+    h1 {
+      text-align: center;
+    }
+    
+    p {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 20px;
+    }
+    </style>
     <title>Ecotricity Meter Reads Service</title>
   </head>
   <body>
-    <p>You've reached the Ecotricty Meter Reads Service!</p>
+    <p>You've reached the demo Ecotricty Meter Reads Service!</p>
+    <p id='url-placeholder'></p>
     <p>Check out the <a href=https://github.com/mishabruml/ecotricity-meter-reads-service>github</a> for more info</p>
-    <p> The API is available at https://ecotricity-meter-reads-service.mishabruml.now.sh/api </p>
-    <p>Written by Misha Bruml, for Ecotricity</p>
+    <script>
+      document.getElementById("url-placeholder").innerHTML = 
+      `The web API is available at: <a href=${window.location.href}meter-read>${window.location.href}meter-read</a>`
+    </script>
+    <p>Written by Misha Bruml, for a job application with Ecotricity</p>
   </body>
 </html>
