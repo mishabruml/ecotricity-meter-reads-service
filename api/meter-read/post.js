@@ -17,7 +17,7 @@ module.exports = async (req, res) => {
 
     // destructure body into the data we need
     const { customerId, serialNumber, mpxn, read, readDate } = body;
-    res.send("posted reading ok");
+    res.status(201).send(body);
   } catch (err) {
     console.error(err);
     if (err.message === "Invalid JSON") res.status(400).send("Invalid JSON");
