@@ -15,9 +15,11 @@ module.exports = async (req, res) => {
     // Validate the body data JSON
     const validBodyData = validatePostBody(body);
 
-    // create reading entry in db
-    const entry = await ReadingModel.create(body);
-    res.status(201).send(entry);
+    if (validBodyData) {
+      // create reading entry in db
+      const entry = await ReadingModel.create(body);
+      res.status(201).send(entry);
+    }
   } catch (err) {
     console.error(err);
     if (err.message === "Invalid JSON") res.status(400).send("Invalid JSON");
