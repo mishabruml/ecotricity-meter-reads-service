@@ -25,8 +25,8 @@ const validator = require("validator");
 const validatePostBody = body => {
   var valid = ajv.validate(postBodySchema, body);
   if (!valid) {
-    console.log("Data invalid");
-    console.log(ajv.errors);
+    // console.log("Data invalid");
+    // console.log(ajv.errors);
     const validationError = new ValidationError(
       ajv.errorsText(),
       (ajvErrors = ajv.errors)
