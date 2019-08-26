@@ -1,7 +1,7 @@
 const validatePostBody = require("../../src/util/validation/validatePostBody");
 const postBodySchema = require("../../src/util/validation/postBodySchema");
-const generateRandomReading = require("../testutilities/generateRandomReading");
-const { DataParameterError, ValidationError } = require("../../src/lib/errors");
+const generateRandomReading = require("../util/generateRandomReading");
+const { ValidationError } = require("../../src/lib/errors");
 const {
   SERIAL_NUMBER_LENGTH,
   MPXN_LENGTH,

@@ -1,6 +1,6 @@
 const { expect } = require("chai");
 const ReadingModel = require("../src/db/models/readingModel");
-const generateRandomReading = require("./testutilities/generateRandomReading");
+const generateRandomReading = require("./util/generateRandomReading");
 
 describe("Reading mongoose schema validation", () => {
   it("should successfully create an instance of the model with valid data", async () => {

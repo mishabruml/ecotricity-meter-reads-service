@@ -11,7 +11,12 @@ module.exports = async (req, res) => {
   try {
     await mongoose.connect(process.env.PROD_DB_URI, { useNewUrlParser: true });
     const { body } = req;
-    validatePostBody(body);
+
+    // Validate the body data JSON
+    const validBodyData = validatePostBody(body);
+
+    // destructure body into the data we need
+    const { customerId, serialNumber, mpxn, read, readDate } = body;
     res.send("posted reading ok");
   } catch (err) {
     console.error(err);

@@ -1,5 +1,6 @@
 // Custom error classes
 
+// Error to be thrown when invalid data encountered
 class ValidationError extends Error {
   constructor(...args) {
     super(...args);
@@ -9,11 +10,4 @@ class ValidationError extends Error {
   }
 }
 
-class InvalidDataError extends Error {
-  constructor(...args) {
-    super(...args);
-    Error.captureStackTrace(this, InvalidDataError);
-  }
-}
-
-module.exports = { InvalidDataError, ValidationError };
+module.exports = { ValidationError };
