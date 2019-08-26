@@ -2,7 +2,7 @@
 const CUSTOMER_ID_UUID_VERSION = 4;
 const SERIAL_NUMBER_LENGTH = 11;
 const MPXN_LENGTH = 8;
-const REQUIRED_READ_TYPES = ["ANYTIME", "NIGHT"];
+const REQUIRED_READ_TYPES = ["ANYTIME", "NIGHT"]; // nb this will force ordering in body of post request
 const REGISTER_ID_LENGTH = 6;
 const READ_VALUE_MIN = 0;
 const READ_VALUE_MAX = 9999;

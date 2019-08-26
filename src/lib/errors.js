@@ -1,9 +1,9 @@
 // Custom error classes
 
-class MissingParameterError extends Error {
+class DataParameterError extends Error {
   constructor(...args) {
     super(...args);
-    Error.captureStackTrace(this, MissingParameterError);
+    Error.captureStackTrace(this, DataParameterError);
   }
 }
 
@@ -14,4 +14,4 @@ class InvalidDataError extends Error {
   }
 }
 
-module.exports = { InvalidDataError, MissingParameterError };
+module.exports = { InvalidDataError, DataParameterError };

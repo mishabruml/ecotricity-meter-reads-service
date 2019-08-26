@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/mishabruml/ecotricity-meter-reads-service#readme",
   "dependencies": {
+    "ajv": "^6.10.2",
     "chai": "^4.2.0",
     "lodash": "^4.17.15",
     "mongoose": "^5.6.9",

@@ -1,4 +1,6 @@
-const { MissingParameterError, InvalidDataError } = require("../lib/errors");
+const postBodySchema = require("./postBodySchema");
+
+const { DataParameterError, InvalidDataError } = require("../../lib/errors");
 
 const {
   CUSTOMER_ID_UUID_VERSION,
@@ -9,15 +11,30 @@ const {
   READ_VALUE_MIN,
   READ_VALUE_MAX,
   READ_VALUE_ALLOW_LEADING_ZEROS
-} = require("../lib/constants");
+} = require("../../lib/constants");
 
 const { expect } = require("chai");
 const _ = require("lodash");
 
+// Json schema validattion library
+const Ajv = require("ajv");
+var ajv = Ajv({ allErrors: true });
+
 const validator = require("validator");
 
 const validatePostBody = body => {
-  if (!body) throw new MissingParameterError("body");
+  var valid = ajv.validate(postBodySchema, body);
+  if (!valid) {
+    console.log("Data invalid");
+    console.log(ajv.errors);
+    throw new DataParameterError(ajv.errorsText());
+  }
+
+  // continue...
+
+  return;
+
+  if (!body) throw new DataParameterError("body");
   try {
     // use chai to check all expected keys are present
     expect(body).to.have.all.keys(
@@ -31,9 +48,12 @@ const validatePostBody = body => {
     console.log(e);
     // grab any missing parameters by diffing actual:expected arrays from the chai error, and throw custom error
     const missingParams = e.expected.filter(x => !e.actual.includes(x)).join();
-    throw new MissingParameterError(missingParams);
+    throw new DataParameterError(missingParams);
   }
+
+  // destructure body into the data we need
   const { customerId, serialNumber, mpxn, read, readDate } = body;
+
   if (!validator.isUUID(customerId, CUSTOMER_ID_UUID_VERSION))
     throw new InvalidDataError(
       `customerId must be uuidv${CUSTOMER_ID_UUID_VERSION}`
@@ -69,7 +89,7 @@ const validatePostBody = body => {
         const missingReadParams = e.expected
           .filter(x => !e.actual.includes(x))
           .join();
-        throw new MissingParameterError(
+        throw new DataParameterError(
           `'read' missing key(s): '${missingReadParams}'`
         );
       }
