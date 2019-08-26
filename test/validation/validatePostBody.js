@@ -1,7 +1,7 @@
-const validatePostBody = require("../src/util/validation/validatePostBody");
-const postBodySchema = require("../src/util/validation/postBodySchema");
-const generateRandomReading = require("./testutilities/generateRandomReading");
-const { DataParameterError, ValidationError } = require("../src/lib/errors");
+const validatePostBody = require("../../src/util/validation/validatePostBody");
+const postBodySchema = require("../../src/util/validation/postBodySchema");
+const generateRandomReading = require("../testutilities/generateRandomReading");
+const { DataParameterError, ValidationError } = require("../../src/lib/errors");
 const {
   SERIAL_NUMBER_LENGTH,
   MPXN_LENGTH,
@@ -9,7 +9,7 @@ const {
   REQUIRED_READ_TYPES,
   READ_VALUE_MIN,
   READ_VALUE_MAX
-} = require("../src/lib/constants");
+} = require("../../src/lib/constants");
 
 const chai = require("chai");
 const { expect } = chai;
@@ -58,7 +58,9 @@ describe("POST /reading data validation", () => {
         ]);
     });
   });
+});
 
+describe("POST /reading data validation: customerId", () => {
   it("should throw an error if customerId is not a string", () => {
     const body = generateRandomReading();
     body.customerId = chance.integer({ min: 100, max: 1000 }); // generate a random number
@@ -89,7 +91,9 @@ describe("POST /reading data validation", () => {
         }
       ]);
   });
+});
 
+describe("POST /reading data vaidation: serialNumber", () => {
   it("should throw an error if serialNumber is not a string of digits only", () => {
     const body = generateRandomReading();
 
@@ -165,7 +169,9 @@ describe("POST /reading data validation", () => {
         }
       ]);
   });
+});
 
+describe("POST /reading data validation: mpxn", () => {
   it("should throw an error if mpxn is not an alphanumeric string", () => {
     const body = generateRandomReading();
 
@@ -241,7 +247,9 @@ describe("POST /reading data validation", () => {
         }
       ]);
   });
+});
 
+describe("POST /reading data validation: read", () => {
   it("should throw an error if read is missing any required readings", () => {
     // test for all null readings
     REQUIRED_READ_TYPES.forEach(readType => {
@@ -421,7 +429,9 @@ describe("POST /reading data validation", () => {
         ]);
     });
   });
+});
 
+describe("POST /reading data validation: readDate", () => {
   it("should throw an error if the readDate is not ISO datestring", () => {
     const body = generateRandomReading();
 
