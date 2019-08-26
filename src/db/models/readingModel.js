@@ -1,9 +1,11 @@
 const mongoose = require("mongoose");
+mongoose.set("useCreateIndex", true);
+const { REQUIRED_READ_TYPES } = require("../../lib/constants");
 
 // "sub" schema for the reads sub-document
 const readSchema = new mongoose.Schema(
   {
-    type: { type: String, required: true, enum: ["NIGHT", "ANYTIME"] },
+    type: { type: String, required: true, enum: REQUIRED_READ_TYPES },
     registerId: { type: String, required: true },
     value: { type: Number, require: true }
   },
