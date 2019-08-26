@@ -4,13 +4,33 @@ const ReadingModel = require("../models/readingModel");
 module.exports = class ReadingModelController {
   constructor() {}
 
+  getAllRecords = async () => {
+    return await ReadingModel.find({}, { _id: false, __v: false })
+      .sort({
+        readDate: -1
+      })
+      .lean();
+  };
+
   getOneByCustomerId = async customerId => {
-    const results = await ReadingModel.findOne(customerId);
-    return results;
+    return await ReadingModel.findOne(customerId, {
+      _id: false,
+      __v: false
+    })
+      .sort({
+        readDate: -1
+      })
+      .lean();
   };
 
   getAllByCustomerId = async customerId => {
-    const results = await ReadingModel.find(customerId);
-    return results;
+    return await ReadingModel.find(customerId, {
+      _id: false,
+      __v: false
+    })
+      .sort({
+        readDate: -1
+      })
+      .lean();
   };
 };
