@@ -15,8 +15,8 @@ module.exports = async (req, res) => {
     // Validate the body data JSON
     const validBodyData = validatePostBody(body);
 
-    // destructure body into the data we need
-    const { customerId, serialNumber, mpxn, read, readDate } = body;
+    // create reading entry in db
+    await ReadingModel.create(body);
     res.send("posted reading ok");
   } catch (err) {
     console.error(err);
