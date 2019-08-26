@@ -4,15 +4,15 @@ const ReadingModel = require("../models/readingModel");
 module.exports = class ReadingModelController {
   constructor() {}
 
-  getAllRecords = async () => {
+  async getAllRecords() {
     return await ReadingModel.find({}, { _id: false, __v: false })
       .sort({
         readDate: -1
       })
       .lean();
-  };
+  }
 
-  getOneByCustomerId = async customerId => {
+  async getOneByCustomerId(customerId) {
     return await ReadingModel.findOne(customerId, {
       _id: false,
       __v: false
@@ -21,9 +21,9 @@ module.exports = class ReadingModelController {
         readDate: -1
       })
       .lean();
-  };
+  }
 
-  getAllByCustomerId = async customerId => {
+  async getAllByCustomerId(customerId) {
     return await ReadingModel.find(customerId, {
       _id: false,
       __v: false
@@ -32,5 +32,5 @@ module.exports = class ReadingModelController {
         readDate: -1
       })
       .lean();
-  };
+  }
 };
