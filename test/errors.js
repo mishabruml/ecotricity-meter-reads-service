@@ -1,13 +1,17 @@
-const { InvalidDataError, ValidationError } = require("../src/lib/errors");
+const { ValidationError } = require("../src/lib/errors");
 const { expect } = require("chai");
-describe("custom error classes", () => {
-  it("should throw a ValidationError OK", () => {
+describe("ValidationError", () => {
+  it("should be able to throw a ValidationError with ajvErrors", () => {
+    const mockAjvErrors = ["ajvError1", "ajvError2"];
     const throwValidationError = () => {
-      throw new ValidationError("whoops", (ajvErrors = ["error1", "error2"]));
+      throw new ValidationError("whoops", (ajvErrors = mockAjvErrors));
     };
 
     expect(() => {
       throwValidationError();
-    }).throw(ValidationError);
+    })
+      .throw(ValidationError)
+      .that.has.property("ajvErrors")
+      .eql(mockAjvErrors);
   });
 });
