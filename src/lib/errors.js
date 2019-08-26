@@ -1,9 +1,11 @@
 // Custom error classes
 
-class DataParameterError extends Error {
+class ValidationError extends Error {
   constructor(...args) {
     super(...args);
-    Error.captureStackTrace(this, DataParameterError);
+    this.name = "ValidationError";
+    this.ajvErrors = ajvErrors;
+    Error.captureStackTrace(this, ValidationError);
   }
 }
 
@@ -14,4 +16,4 @@ class InvalidDataError extends Error {
   }
 }
 
-module.exports = { InvalidDataError, DataParameterError };
+module.exports = { InvalidDataError, ValidationError };

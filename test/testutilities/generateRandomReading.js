@@ -22,7 +22,9 @@ const generateRandomReading = () => {
   const nowMs = new Date().getTime();
   const yearAgoMs = nowMs - 31536000000;
 
-  const readDate = new Date(chance.natural({ min: yearAgoMs, max: nowMs })); // Random date anywhere in the last year from now
+  const readDate = new Date(
+    chance.natural({ min: yearAgoMs, max: nowMs })
+  ).toISOString(); // Random date anywhere in the last year from now- note that it is a string since Date objects
 
   return { customerId, serialNumber, mpxn, read, readDate };
 };

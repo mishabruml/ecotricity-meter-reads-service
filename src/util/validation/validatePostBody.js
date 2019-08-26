@@ -1,6 +1,6 @@
 const postBodySchema = require("./postBodySchema");
 
-const { DataParameterError, InvalidDataError } = require("../../lib/errors");
+const { ValidationError, InvalidDataError } = require("../../lib/errors");
 
 const {
   CUSTOMER_ID_UUID_VERSION,
@@ -27,14 +27,18 @@ const validatePostBody = body => {
   if (!valid) {
     console.log("Data invalid");
     console.log(ajv.errors);
-    throw new DataParameterError(ajv.errorsText());
+    const validationError = new ValidationError(
+      ajv.errorsText(),
+      (ajvErrors = ajv.errors)
+    );
+    throw validationError;
   }
 
   // continue...
 
-  return;
+  return valid;
 
-  if (!body) throw new DataParameterError("body");
+  if (!body) throw new ValidationError("body");
   try {
     // use chai to check all expected keys are present
     expect(body).to.have.all.keys(
@@ -48,7 +52,7 @@ const validatePostBody = body => {
     console.log(e);
     // grab any missing parameters by diffing actual:expected arrays from the chai error, and throw custom error
     const missingParams = e.expected.filter(x => !e.actual.includes(x)).join();
-    throw new DataParameterError(missingParams);
+    throw new ValidationError(missingParams);
   }
 
   // destructure body into the data we need
@@ -89,7 +93,7 @@ const validatePostBody = body => {
         const missingReadParams = e.expected
           .filter(x => !e.actual.includes(x))
           .join();
-        throw new DataParameterError(
+        throw new ValidationError(
           `'read' missing key(s): '${missingReadParams}'`
         );
       }
