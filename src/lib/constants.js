@@ -6,7 +6,6 @@ const REQUIRED_READ_TYPES = ["ANYTIME", "NIGHT"]; // nb this will force ordering
 const REGISTER_ID_LENGTH = 6;
 const READ_VALUE_MIN = 0;
 const READ_VALUE_MAX = 9999;
-const READ_VALUE_ALLOW_LEADING_ZEROS = true;
 
 module.exports = {
   CUSTOMER_ID_UUID_VERSION,
@@ -15,6 +14,5 @@ module.exports = {
   REQUIRED_READ_TYPES,
   REGISTER_ID_LENGTH,
   READ_VALUE_MIN,
-  READ_VALUE_MAX,
-  READ_VALUE_ALLOW_LEADING_ZEROS
+  READ_VALUE_MAX
 };
