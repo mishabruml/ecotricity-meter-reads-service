@@ -4,7 +4,7 @@
   "description": "Ecotricity demo API for accepting and presenting customer meter readings",
   "main": "index.js",
   "scripts": {
-    "test": "mocha",
+    "test": "mocha --recursive",
     "test-coverage": "nyc npm test",
     "report-coverage": "nyc report --reporter=text-lcov > coverage.lcov && codecov",
     "test-cover-report": "npm run test-coverage && npm run report-coverage"
@@ -23,10 +23,14 @@
   },
   "homepage": "https://github.com/mishabruml/ecotricity-meter-reads-service#readme",
   "dependencies": {
-    "mongoose": "^5.6.9"
+    "ajv": "^6.10.2",
+    "chai": "^4.2.0",
+    "chai-shallow-deep-equal": "^1.4.6",
+    "lodash": "^4.17.15",
+    "mongoose": "^5.6.9",
+    "validator": "^11.1.0"
   },
   "devDependencies": {
-    "chai": "^4.2.0",
     "chance": "^1.0.18",
     "codecov": "^3.5.0",
     "mocha": "^6.2.0",
