@@ -60,7 +60,8 @@ const postBodySchema = {
     read: {
       type: "array",
       items: readItemsSchema,
-      additionalItems: false
+      additionalItems: false,
+      minItems: REQUIRED_READ_TYPES.length
     },
     readDate: { type: "string", format: "date-time" }
   },
