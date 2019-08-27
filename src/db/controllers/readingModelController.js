@@ -12,6 +12,17 @@ module.exports = class ReadingModelController {
       .lean();
   }
 
+  async getAllByIdempotencyKey(idempotencyKey) {
+    return await ReadingModel.find(
+      { idempotencyKey },
+      { _id: false, __v: false }
+    )
+      .sort({
+        readDate: -1
+      })
+      .lean();
+  }
+
   async getOneByCustomerId(customerId) {
     return await ReadingModel.findOne(
       { customerId },
