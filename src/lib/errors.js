@@ -14,10 +14,20 @@ class IdempotencyError extends Error {
   constructor(idempotencyKey) {
     super(idempotencyKey);
     this.name = "IdempotencyError";
-    this.message = "An existing record matching the idempotency key was found";
+    this.message = "Found existing record(s) matching the idempotency key";
     this.idempotencyKey = idempotencyKey;
     Error.captureStackTrace(this, IdempotencyError);
   }
 }
 
-module.exports = { ValidationError, IdempotencyError };
+class DuplicateError extends Error {
+  constructor(body) {
+    super(body);
+    this.name = "DuplicateError";
+    this.message = "Found existing record(s) matching the provided data";
+    this.body = body;
+    Error.captureStackTrace(this, DuplicateError);
+  }
+}
+
+module.exports = { ValidationError, IdempotencyError, DuplicateError };

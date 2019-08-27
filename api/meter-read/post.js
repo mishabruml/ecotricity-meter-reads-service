@@ -1,11 +1,12 @@
 const mongoose = require("mongoose");
 const validatePostBody = require("../../src/util/validation/validatePostBody");
 const validatePostIdempotency = require("../../src/util/validation/validatePostIdempotency");
+const validateDataUniqueness = require("../../src/util/validation/validateDataUniqueness");
+
 const {
-  DataParameterError,
-  InvalidDataError,
-  IdempotencyError,
-  ValidationError
+  ValidationError,
+  DuplicateError,
+  IdempotencyError
 } = require("../../src/lib/errors");
 
 const ReadingModel = require("../../src/db/models/readingModel");
@@ -20,9 +21,11 @@ module.exports = async (req, res) => {
     const idempotentRequest = await validatePostIdempotency(idempotencyKey);
 
     // Validate the body data JSON
-    const validBodyData = validatePostBody(body);
+    const validBodyData = await validatePostBody(body);
 
-    if (idempotentRequest && validBodyData) {
+    const uniqueRequestData = await validateDataUniqueness(body);
+
+    if (idempotentRequest && validBodyData && uniqueRequestData) {
       // combine the body and idempotency key into a single object
       const reading = body;
       reading.idempotencyKey = idempotencyKey;
@@ -37,11 +40,13 @@ module.exports = async (req, res) => {
     if (err.message === "Invalid JSON") {
       res.status(400).send(err.message);
     } else if (err instanceof IdempotencyError) {
-      res
-        .status(409)
-        .send(`${err.name}: ${err.message}. ${err.idempotencyKey}`);
+      res.status(409).send(`${err.name}: ${err.message} ${err.idempotencyKey}`);
     } else if (err instanceof ValidationError) {
       res.status(400).send(`${err.name}: ${err.message}`);
+    } else if (err instanceof DuplicateError) {
+      res
+        .status(409)
+        .send(`${err.name}: ${err.message} ${JSON.stringify(err.body)}`);
     } else {
       res.status(500).send(`Server error. ${err.message || ""}`);
     }
