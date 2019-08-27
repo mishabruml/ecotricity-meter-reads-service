@@ -1,4 +1,9 @@
-const { ValidationError, IdempotencyError } = require("../src/lib/errors");
+const {
+  ValidationError,
+  IdempotencyError,
+  DuplicateError
+} = require("../src/lib/errors");
+
 const { expect } = require("chai");
 
 describe("ValidationError class", () => {
@@ -30,5 +35,21 @@ describe("IdempotencyError class", () => {
       .throw(IdempotencyError)
       .that.has.property("idempotencyKey")
       .eql(mockIdempotencyKey);
+  });
+});
+
+describe("DuplicateError class", () => {
+  it("should be able to throw a DuplicateError with body/data constructor arg", () => {
+    const mockBody = { key1: "value1", key2: "value2" };
+    const throwValidationError = () => {
+      throw new DuplicateError(mockBody);
+    };
+
+    expect(() => {
+      throwValidationError();
+    })
+      .throw(DuplicateError)
+      .that.has.property("body")
+      .eql(mockBody);
   });
 });
