@@ -9,7 +9,7 @@ describe("Reading mongoose schema validation", () => {
   it("should successfully create an instance of the model with valid data", async () => {
     const { body, headers } = generateRandomReading();
     const reading = body;
-    reading.idempotencyKey = headers.idempotencyKey; // add the idempotency key
+    reading.idempotencyKey = headers["idempotency-key"]; // add the idempotency key
     const readingModel = new ReadingModel(reading);
     await readingModel.validate();
   });
@@ -17,7 +17,7 @@ describe("Reading mongoose schema validation", () => {
   it("should fail validation when no customerId is specified", async () => {
     const { body, headers } = generateRandomReading();
     const reading = body;
-    reading.idempotencyKey = headers.idempotencyKey; // add the idempotency key
+    reading.idempotencyKey = headers["idempotency-key"]; // add the idempotency key
     reading.customerId = null;
     const readingModel = new ReadingModel(reading);
     readingModel.validate(err => {
@@ -31,7 +31,7 @@ describe("Reading mongoose schema validation", () => {
     const getfields = () => {
       const { body, headers } = generateRandomReading();
       const reading = body;
-      reading.idempotencyKey = headers.idempotencyKey; // add the idempotency key
+      reading.idempotencyKey = headers["idempotency-key"]; // add the idempotency key
       return Object.keys(reading);
     };
 
@@ -41,7 +41,7 @@ describe("Reading mongoose schema validation", () => {
     fields.forEach(field => {
       const { body, headers } = generateRandomReading();
       const reading = body;
-      reading.idempotencyKey = headers.idempotencyKey; // add the idempotency key
+      reading.idempotencyKey = headers["idempotency-key"]; // add the idempotency key
       reading[field] = null;
       const readingModel = new ReadingModel(reading);
       readingModel.validate(err => {
@@ -56,7 +56,7 @@ describe("Reading mongoose schema validation", () => {
     // set up random reading
     const { body, headers } = generateRandomReading();
     const reading = body;
-    reading.idempotencyKey = headers.idempotencyKey; // add the idempotency key
+    reading.idempotencyKey = headers["idempotency-key"]; // add the idempotency key
 
     // set customerId
     reading.customerId = { a: 1, b: 2 }; // will not cast, forcing error
@@ -74,7 +74,7 @@ describe("Reading mongoose schema validation", () => {
     // set up random reading
     const { body, headers } = generateRandomReading();
     const reading = body;
-    reading.idempotencyKey = headers.idempotencyKey; // add the idempotency key
+    reading.idempotencyKey = headers["idempotency-key"]; // add the idempotency key
 
     // set read type to something invalid
     const illegalReadType = chance.string(); // generate a random read type

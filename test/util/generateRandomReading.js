@@ -1,14 +1,16 @@
+// Helper library to generate random reading data, structured as they would hit our API
+
 const uuidv4 = require("uuid");
 const Chance = require("chance");
 const chance = new Chance();
+
 const {
   SERIAL_NUMBER_LENGTH,
   MPXN_LENGTH,
   REQUIRED_READ_TYPES,
   REGISTER_ID_LENGTH,
   READ_VALUE_MIN,
-  READ_VALUE_MAX,
-  READ_VALUE_ALLOW_LEADING_ZEROS
+  READ_VALUE_MAX
 } = require("../../src/lib/constants");
 
 const generateRandomReading = () => {
@@ -19,11 +21,13 @@ const generateRandomReading = () => {
     length: SERIAL_NUMBER_LENGTH,
     numeric: true
   });
+
   const mpxn = chance.string({
     length: MPXN_LENGTH,
     numeric: true,
     alpha: true
   });
+
   const registerId = chance.string({
     length: REGISTER_ID_LENGTH,
     numeric: true,
@@ -49,7 +53,7 @@ const generateRandomReading = () => {
 
   return {
     body: { customerId, serialNumber, mpxn, read, readDate },
-    headers: { idempotencyKey }
+    headers: { "idempotency-key": idempotencyKey }
   };
 };
 
