@@ -6,13 +6,22 @@ const readingModelController = new ReadingModelController();
 module.exports = async (req, res) => {
   try {
     await mongoose.connect(process.env.PROD_DB_URI, { useNewUrlParser: true });
-    console.log({ method: req.method });
     console.log({ query: req.query });
-    const { customerId } = req.query;
 
     let result;
-    if (!customerId) result = await readingModelController.getAllRecords();
-    else result = await readingModelController.getOneByCustomerId(customerId);
+
+    const noQueries = Object.keys(req.query).length === 0;
+
+    if (noQueries) {
+      console.log("no querystrings");
+      result = await readingModelController.getAllRecords();
+    }
+
+    const { customerId, serialNumber, mpxn } = req.query;
+
+    console.log(customerId, serialNumber, mpxn);
+
+    // result = await readingModelController.getOneByCustomerId(customerId);
 
     console.log(result);
     res.send(result);

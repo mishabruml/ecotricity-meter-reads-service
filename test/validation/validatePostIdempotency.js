@@ -1,4 +1,4 @@
-const validatePostIdempotency = require("../../src/util/validation/validatePostIdempotency");
+const validatePostIdempotency = require("../../src/util/validation/post/validatePostIdempotency");
 const { ValidationError, IdempotencyError } = require("../../src/lib/errors");
 const ReadingModelController = require("../../src/db/controllers/readingModelController");
 

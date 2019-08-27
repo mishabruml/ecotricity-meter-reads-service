@@ -1,5 +1,5 @@
-const { DuplicateError } = require("../../lib/errors");
-const ReadingModelController = require("../../db/controllers/readingModelController");
+const { DuplicateError } = require("../../../lib/errors");
+const ReadingModelController = require("../../../db/controllers/readingModelController");
 const readingModelController = new ReadingModelController();
 
 const validateDataUniqueness = async data => {

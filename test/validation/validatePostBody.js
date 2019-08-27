@@ -1,5 +1,5 @@
-const validatePostBody = require("../../src/util/validation/validatePostBody");
-const postBodySchema = require("../../src/util/validation/postBodySchema");
+const validatePostBody = require("../../src/util/validation/post/validatePostBody");
+const postBodySchema = require("../../src/util/validation/schemas/postBodySchema");
 const generateRandomReading = require("../util/generateRandomReading");
 const { ValidationError } = require("../../src/lib/errors");
 const {

@@ -3,8 +3,8 @@ existing records with incoming idempotency key,
 indicating network duplication. The data itself
 is checked for duplicate records in another module */
 
-const { ValidationError, IdempotencyError } = require("../../lib/errors");
-const ReadingModelController = require("../../db/controllers/readingModelController");
+const { ValidationError, IdempotencyError } = require("../../../lib/errors");
+const ReadingModelController = require("../../../db/controllers/readingModelController");
 const readingModelController = new ReadingModelController();
 
 const Ajv = require("ajv");
