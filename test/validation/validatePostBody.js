@@ -20,7 +20,7 @@ const chance = new Chance();
 
 describe("POST /reading data validation", () => {
   it("should accept a valid POST body", () => {
-    const body = generateRandomReading();
+    const { body } = generateRandomReading();
     const valid = validatePostBody(body);
     expect(valid).to.be.true;
   });
@@ -46,7 +46,7 @@ describe("POST /reading data validation", () => {
   it("should throw an error if any required field is missing", () => {
     // for each required field
     postBodySchema.required.forEach(field => {
-      const body = generateRandomReading();
+      const { body } = generateRandomReading();
       delete body[field]; // delete each required field in turn
       expect(() => {
         validatePostBody(body);
@@ -62,7 +62,7 @@ describe("POST /reading data validation", () => {
 
 describe("POST /reading data validation: customerId", () => {
   it("should throw an error if customerId is not a string", () => {
-    const body = generateRandomReading();
+    const { body } = generateRandomReading();
     body.customerId = chance.integer({ min: 100, max: 1000 }); // generate a random number
     expect(() => {
       validatePostBody(body);
@@ -75,7 +75,7 @@ describe("POST /reading data validation: customerId", () => {
   });
 
   it("should throw an error if customerId is not a uuid string", () => {
-    const body = generateRandomReading();
+    const { body } = generateRandomReading();
     body.customerId = chance.string({ alpha: true });
     expect(() => {
       validatePostBody(body);
@@ -95,7 +95,7 @@ describe("POST /reading data validation: customerId", () => {
 
 describe("POST /reading data vaidation: serialNumber", () => {
   it("should throw an error if serialNumber is not a string of digits only", () => {
-    const body = generateRandomReading();
+    const { body } = generateRandomReading();
 
     // Test for non-string
     body.serialNumber = chance.integer({ min: 100, max: 1000 }); // generate a random number
@@ -131,7 +131,7 @@ describe("POST /reading data vaidation: serialNumber", () => {
   });
 
   it("should throw an error if serialNumber string is not the right number of characters", () => {
-    const body = generateRandomReading();
+    const { body } = generateRandomReading();
 
     // generate a 'too short' serial number
     body.serialNumber = chance.string({
@@ -173,7 +173,7 @@ describe("POST /reading data vaidation: serialNumber", () => {
 
 describe("POST /reading data validation: mpxn", () => {
   it("should throw an error if mpxn is not an alphanumeric string", () => {
-    const body = generateRandomReading();
+    const { body } = generateRandomReading();
 
     // Test for symbols-only string
     body.mpxn = chance.integer({ min: 100, max: 1000 }); // generate a random number
@@ -209,7 +209,7 @@ describe("POST /reading data validation: mpxn", () => {
   });
 
   it("should throw an error if mpxn string is not the right number of characters", () => {
-    const body = generateRandomReading();
+    const { body } = generateRandomReading();
 
     // generate a 'too short' mpxn
     body.mpxn = chance.string({
@@ -253,7 +253,7 @@ describe("POST /reading data validation: read", () => {
   it("should throw an error if read is missing any required readings", () => {
     // test for all null readings
     REQUIRED_READ_TYPES.forEach(readType => {
-      const body = generateRandomReading();
+      const { body } = generateRandomReading();
 
       const index = body.read.findIndex(o => o.type === readType);
       body.read[index] = null;
@@ -263,7 +263,7 @@ describe("POST /reading data validation: read", () => {
     });
 
     // test for altogether missing readings
-    const body = generateRandomReading();
+    const { body } = generateRandomReading();
 
     while (body.read.length !== 0) {
       body.read.pop();
@@ -277,7 +277,7 @@ describe("POST /reading data validation: read", () => {
   });
 
   it("should throw an error if more readings than permitted are encountered", () => {
-    const body = generateRandomReading();
+    const { body } = generateRandomReading();
 
     // duplicate the last element of read array
     const lastElement = body.read[body.read.length - 1];
@@ -292,7 +292,7 @@ describe("POST /reading data validation: read", () => {
   it("should throw an error if any readings are missing any parameters", () => {
     // run test for each reading
     REQUIRED_READ_TYPES.forEach(readType => {
-      const body = generateRandomReading();
+      const { body } = generateRandomReading();
       const reading = body.read.find(o => o.type === readType);
 
       // for each property of the reading
@@ -306,7 +306,7 @@ describe("POST /reading data validation: read", () => {
   });
 
   it("should throw an error for disallowed reading types", () => {
-    const body = generateRandomReading();
+    const { body } = generateRandomReading();
     const illegalReadType = chance.string(); // generate a random read type
     expect(REQUIRED_READ_TYPES.indexOf(illegalReadType)).to.equal(-1); // check we haven't randomly generated an allowed type...
     body.read[0].type = illegalReadType;
@@ -322,7 +322,7 @@ describe("POST /reading data validation: read", () => {
   it("should throw an error if any reading's registerId is not an alphanumeric string or incorrect length", () => {
     // run test for each reading
     REQUIRED_READ_TYPES.forEach(readType => {
-      let body = generateRandomReading();
+      let { body } = generateRandomReading();
       const reading = body.read.find(o => o.type === readType);
       const index = body.read.findIndex(o => o.type === readType);
 
@@ -382,7 +382,7 @@ describe("POST /reading data validation: read", () => {
   it("should throw an error if any reading's value is not a number, or is outwith the allowed limits", () => {
     // run test for each reading
     REQUIRED_READ_TYPES.forEach(readType => {
-      let body = generateRandomReading();
+      let { body } = generateRandomReading();
       const reading = body.read.find(o => o.type === readType);
       const index = body.read.findIndex(o => o.type === readType);
 
@@ -433,7 +433,7 @@ describe("POST /reading data validation: read", () => {
 
 describe("POST /reading data validation: readDate", () => {
   it("should throw an error if the readDate is not ISO datestring", () => {
-    const body = generateRandomReading();
+    const { body } = generateRandomReading();
 
     // try readDate as an integer
     body.readDate = chance.integer();

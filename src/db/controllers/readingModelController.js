@@ -12,6 +12,23 @@ module.exports = class ReadingModelController {
       .lean();
   }
 
+  async getAllByIdempotencyKey(idempotencyKey) {
+    return await ReadingModel.find(
+      { idempotencyKey },
+      { idempotencyKey: true, _id: true } // only need to project idempotencyKey and doc _id
+    )
+      .sort({
+        readDate: -1
+      })
+      .lean();
+  }
+
+  async getExactMatches(data) {
+    return await ReadingModel.find(data, { _id: false, __v: false })
+      .sort({ readDate: -1 })
+      .lean();
+  }
+
   async getOneByCustomerId(customerId) {
     return await ReadingModel.findOne(
       { customerId },

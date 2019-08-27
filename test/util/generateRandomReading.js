@@ -13,6 +13,8 @@ const {
 
 const generateRandomReading = () => {
   const customerId = uuidv4();
+  const idempotencyKey = uuidv4();
+
   const serialNumber = chance.string({
     length: SERIAL_NUMBER_LENGTH,
     numeric: true
@@ -45,7 +47,10 @@ const generateRandomReading = () => {
     chance.natural({ min: yearAgoMs, max: nowMs })
   ).toISOString();
 
-  return { customerId, serialNumber, mpxn, read, readDate };
+  return {
+    body: { customerId, serialNumber, mpxn, read, readDate },
+    headers: { idempotencyKey }
+  };
 };
 
 module.exports = generateRandomReading;
