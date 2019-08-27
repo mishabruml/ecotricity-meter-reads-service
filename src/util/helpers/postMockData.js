@@ -4,7 +4,7 @@ const generateRandomReading = require("../../../test/util/generateRandomReading"
 
 const postMockData = async () => {
   const mockData = await generateRandomReading();
-  const req = { body: mockData };
+  const req = mockData;
   const res = {
     status: code => {
       console.log(code);
