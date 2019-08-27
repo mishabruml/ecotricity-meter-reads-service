@@ -1,4 +1,4 @@
-const validateDataUniqueness = require("../../../src/util/validation/post/validateDataUniqueness");
+const validateDataUniqueness = require("../../../src/validation/post/validateDataUniqueness");
 const { DuplicateError } = require("../../../src/lib/errors");
 const ReadingModelController = require("../../../src/db/controllers/readingModelController");
 const generateRandomReading = require("../../util/generateRandomReading");

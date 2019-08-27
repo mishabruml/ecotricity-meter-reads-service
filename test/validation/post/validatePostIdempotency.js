@@ -1,4 +1,4 @@
-const validatePostIdempotency = require("../../../src/util/validation/post/validatePostIdempotency");
+const validatePostIdempotency = require("../../../src/validation/post/validatePostIdempotency");
 const {
   ValidationError,
   IdempotencyError

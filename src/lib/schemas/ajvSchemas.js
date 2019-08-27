@@ -8,7 +8,7 @@ const {
   READ_VALUE_MIN,
   READ_VALUE_MAX,
   REQUIRED_READ_TYPES
-} = require("../../../lib/constants");
+} = require("../constants");
 
 // registerId sub-schema shared for all 'read' entries
 const registerIdSchema = {

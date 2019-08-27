@@ -6,7 +6,7 @@ const {
   readDateSchema
 } = require("./ajvSchemas");
 
-const { POST_BODY_REQUIRED_FIELDS } = require("../../../lib/constants");
+const { POST_BODY_REQUIRED_FIELDS } = require("../../lib/constants");
 
 const postBodySchema = {
   type: "object",
