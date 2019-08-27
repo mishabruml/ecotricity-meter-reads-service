@@ -4,9 +4,11 @@ const generateRandomReading = require("./util/generateRandomReading");
 
 describe("Reading mongoose schema validation", () => {
   it("should successfully create an instance of the model with valid data", async () => {
-    const randomReadingData = generateRandomReading();
-    const reading = new ReadingModel(randomReadingData);
-    await reading.validate();
+    const { body, headers } = generateRandomReading();
+    const reading = body;
+    reading.idempotencyKey = headers.idempotencyKey; // add the idempotency key
+    const readingModel = new ReadingModel(reading);
+    await readingModel.validate();
   });
 
   it("should fail validation when no customerId is specified", async () => {
