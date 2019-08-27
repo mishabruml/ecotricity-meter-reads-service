@@ -10,9 +10,9 @@ const Chance = require("chance");
 const chance = new Chance();
 
 const sinon = require("sinon");
-const sandbox = sinon.sandbox.create();
+const sandbox = sinon.createSandbox();
 
-describe("POST /reading data validation: idempotencyKey header", () => {
+describe("POST /reading idempotencyKey validation", () => {
   it("should throw a validation error if idempotencyKey is not a string", async () => {
     const idempotencyKey = chance.integer({ min: 100, max: 1000 }); // generate a random number
 
@@ -37,8 +37,6 @@ describe("POST /reading data validation: idempotencyKey header", () => {
     try {
       await validatePostIdempotency(idempotencyKey);
     } catch (e) {
-      console.error(e);
-
       expect(e)
         .to.be.an.instanceOf(ValidationError)
         .that.has.property("ajvErrors")
