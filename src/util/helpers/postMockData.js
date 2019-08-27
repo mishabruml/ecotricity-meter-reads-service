@@ -4,6 +4,7 @@ const generateRandomReading = require("../../../test/util/generateRandomReading"
 
 const postMockData = async () => {
   const mockData = await generateRandomReading();
+  mockData.headers["idempotency-key"] = mockData.headers.idempotencyKey;
   const req = mockData;
   const res = {
     status: code => {
@@ -19,5 +20,3 @@ const postMockData = async () => {
 };
 
 postMockData();
-
-// module.exports = postMockData;

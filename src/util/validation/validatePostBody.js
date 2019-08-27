@@ -13,8 +13,6 @@ const validatePostBody = body => {
     throw new ValidationError(ajv.errorsText(), (ajvErrors = ajv.errors));
   }
 
-  // continue...
-
   return valid;
 };
 

@@ -1,3 +1,8 @@
+/* Validates the idempotency key format and checks for 
+existing records with incoming idempotency key,
+indicating network duplication. The data itself
+is checked for duplicate records in another module */
+
 const { ValidationError, IdempotencyError } = require("../../lib/errors");
 const ReadingModelController = require("../../db/controllers/readingModelController");
 const readingModelController = new ReadingModelController();
@@ -11,6 +16,7 @@ const idempotencyKeySchema = {
 };
 
 const validatePostIdempotency = async idempotencyKey => {
+  // validate the idempotencyKey format
   let valid = ajv.validate(idempotencyKeySchema, idempotencyKey);
   if (!valid) {
     console.log("idk invalid");
@@ -21,11 +27,11 @@ const validatePostIdempotency = async idempotencyKey => {
     );
   }
 
-  const result = await readingModelController.getAllByIdempotencyKey(
+  const existingIdempotencyKeys = await readingModelController.getAllByIdempotencyKey(
     idempotencyKey
   );
 
-  if (result.length) {
+  if (existingIdempotencyKeys.length) {
     valid = false;
     throw new IdempotencyError(idempotencyKey);
   }
