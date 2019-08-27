@@ -25,13 +25,11 @@
   "homepage": "https://github.com/mishabruml/ecotricity-meter-reads-service#readme",
   "dependencies": {
     "ajv": "^6.10.2",
-    "chai": "^4.2.0",
-    "chai-shallow-deep-equal": "^1.4.6",
-    "lodash": "^4.17.15",
-    "mongoose": "^5.6.9",
-    "validator": "^11.1.0"
+    "mongoose": "^5.6.9"
   },
   "devDependencies": {
+    "chai": "^4.2.0",
+    "chai-shallow-deep-equal": "^1.4.6",
     "chance": "^1.0.18",
     "codecov": "^3.5.0",
     "dotenv": "^8.1.0",

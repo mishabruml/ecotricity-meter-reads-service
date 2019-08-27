@@ -1,6 +1,9 @@
 const { expect } = require("chai");
 const ReadingModel = require("../src/db/models/readingModel");
 const generateRandomReading = require("./util/generateRandomReading");
+const { REQUIRED_READ_TYPES } = require("../src/lib/constants");
+const Chance = require("chance");
+const chance = new Chance();
 
 describe("Reading mongoose schema validation", () => {
   it("should successfully create an instance of the model with valid data", async () => {
@@ -12,25 +15,36 @@ describe("Reading mongoose schema validation", () => {
   });
 
   it("should fail validation when no customerId is specified", async () => {
-    const randomReadingData = generateRandomReading();
-    randomReadingData.customerId = null;
-    const reading = new ReadingModel(randomReadingData);
-    reading.validate(err => {
+    const { body, headers } = generateRandomReading();
+    const reading = body;
+    reading.idempotencyKey = headers.idempotencyKey; // add the idempotency key
+    reading.customerId = null;
+    const readingModel = new ReadingModel(reading);
+    readingModel.validate(err => {
       expect(err.name).to.eql("ValidationError");
       expect(err.errors.customerId.path).to.eql("customerId");
     });
   });
 
   it("should fail schema validation when any required field is omitted on document creation", async () => {
-    const randomReadingData = generateRandomReading();
+    // extract all the fields we should test over
+    const getfields = () => {
+      const { body, headers } = generateRandomReading();
+      const reading = body;
+      reading.idempotencyKey = headers.idempotencyKey; // add the idempotency key
+      return Object.keys(reading);
+    };
 
-    // try the validation for each field = null
-    const fields = Object.keys(randomReadingData);
+    const fields = getfields();
+
+    // try the validation for each field value = null in turn
     fields.forEach(field => {
-      const data = generateRandomReading();
-      data[field] = null;
-      const reading = new ReadingModel(data);
-      reading.validate(err => {
+      const { body, headers } = generateRandomReading();
+      const reading = body;
+      reading.idempotencyKey = headers.idempotencyKey; // add the idempotency key
+      reading[field] = null;
+      const readingModel = new ReadingModel(reading);
+      readingModel.validate(err => {
         expect(err.name).to.eql("ValidationError");
         expect(err.errors[field].path).to.eql(field);
         expect(err.errors[field].kind).to.eql("required");
@@ -39,10 +53,17 @@ describe("Reading mongoose schema validation", () => {
   });
 
   it("should fail schema validation when invalid data-type is entered for customerId", async () => {
-    const randomReadingData = generateRandomReading();
-    randomReadingData.customerId = { a: 1, b: 2 }; // will not cast, forcing error
-    const reading = new ReadingModel(randomReadingData);
-    reading.validate(err => {
+    // set up random reading
+    const { body, headers } = generateRandomReading();
+    const reading = body;
+    reading.idempotencyKey = headers.idempotencyKey; // add the idempotency key
+
+    // set customerId
+    reading.customerId = { a: 1, b: 2 }; // will not cast, forcing error
+    const readingModel = new ReadingModel(reading);
+
+    // try validation
+    readingModel.validate(err => {
       expect(err.name).to.eql("ValidationError");
       expect(err.errors.customerId.path).to.eql("customerId");
       expect(err.errors.customerId.kind).to.eql("String");
@@ -50,16 +71,23 @@ describe("Reading mongoose schema validation", () => {
   });
 
   it("should fail schema validation when 'read type' is not one of 'DAY' or 'ANYTIME'", async () => {
-    const randomReadingData = generateRandomReading();
-    const INVALID_TYPE_STRING = "kja-;//sdj$$b182££3887yjsndhb";
-    randomReadingData.read[0].type = INVALID_TYPE_STRING;
-    const reading = new ReadingModel(randomReadingData);
-    reading.validate(err => {
+    // set up random reading
+    const { body, headers } = generateRandomReading();
+    const reading = body;
+    reading.idempotencyKey = headers.idempotencyKey; // add the idempotency key
+
+    // set read type to something invalid
+    const illegalReadType = chance.string(); // generate a random read type
+    expect(REQUIRED_READ_TYPES.indexOf(illegalReadType)).to.equal(-1); // check we haven't randomly generated an allowed type...
+    reading.read[0].type = illegalReadType;
+
+    const readingModel = new ReadingModel(reading);
+    readingModel.validate(err => {
       expect(err.name).to.eql("ValidationError");
       const errors = err.errors["read.0.type"];
       expect(errors.path).to.eql("type");
       expect(errors.kind).to.eql("enum");
-      expect(errors.value).to.eql(INVALID_TYPE_STRING);
+      expect(errors.value).to.eql(illegalReadType);
     });
   });
 });
