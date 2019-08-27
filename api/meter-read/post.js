@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
-const validatePostBody = require("../../src/util/validation/validatePostBody");
-const validatePostIdempotency = require("../../src/util/validation/validatePostIdempotency");
-const validateDataUniqueness = require("../../src/util/validation/validateDataUniqueness");
+const validatePostBody = require("../../src/util/validation/post/validatePostBody");
+const validatePostIdempotency = require("../../src/util/validation/post/validatePostIdempotency");
+const validateDataUniqueness = require("../../src/util/validation/post/validateDataUniqueness");
 
 const {
   ValidationError,
