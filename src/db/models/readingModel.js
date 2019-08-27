@@ -13,12 +13,15 @@ const readSchema = new mongoose.Schema(
 );
 
 // Main schema
-const readingSchema = new mongoose.Schema({
-  customerId: { type: String, required: true, index: true },
-  serialNumber: { type: Number, required: true },
-  mpxn: { type: String, required: true },
-  read: { type: [readSchema], required: true },
-  readDate: { type: Date, required: true }
-});
+const readingSchema = new mongoose.Schema(
+  {
+    customerId: { type: String, required: true, index: true },
+    serialNumber: { type: Number, required: true },
+    mpxn: { type: String, required: true },
+    read: { type: [readSchema], required: true },
+    readDate: { type: Date, required: true }
+  },
+  { timestamps: { createdAt: true, updatedAt: false } } // will automatically timestamp the mongo doc at time of creation
+);
 
 module.exports = mongoose.model("readings", readingSchema); // export as model

@@ -18,7 +18,8 @@ module.exports = async (req, res) => {
     if (validBodyData) {
       // create reading entry in db
       const entry = await ReadingModel.create(body);
-      res.status(201).send(entry);
+      res.status(201);
+      res.send(entry);
     }
   } catch (err) {
     console.error(err);
