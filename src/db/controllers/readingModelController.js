@@ -13,10 +13,13 @@ module.exports = class ReadingModelController {
   }
 
   async getOneByCustomerId(customerId) {
-    return await ReadingModel.findOne(customerId, {
-      _id: false,
-      __v: false
-    })
+    return await ReadingModel.findOne(
+      { customerId },
+      {
+        _id: false,
+        __v: false
+      }
+    )
       .sort({
         readDate: -1
       })
@@ -24,10 +27,13 @@ module.exports = class ReadingModelController {
   }
 
   async getAllByCustomerId(customerId) {
-    return await ReadingModel.find(customerId, {
-      _id: false,
-      __v: false
-    })
+    return await ReadingModel.find(
+      { customerId },
+      {
+        _id: false,
+        __v: false
+      }
+    )
       .sort({
         readDate: -1
       })
