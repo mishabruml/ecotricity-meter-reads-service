@@ -1,7 +1,7 @@
-const validateDataUniqueness = require("../../src/util/validation/post/validateDataUniqueness");
-const { DuplicateError } = require("../../src/lib/errors");
-const ReadingModelController = require("../../src/db/controllers/readingModelController");
-const generateRandomReading = require("../util/generateRandomReading");
+const validateDataUniqueness = require("../../../src/util/validation/post/validateDataUniqueness");
+const { DuplicateError } = require("../../../src/lib/errors");
+const ReadingModelController = require("../../../src/db/controllers/readingModelController");
+const generateRandomReading = require("../../util/generateRandomReading");
 
 const chai = require("chai");
 chai.use(require("chai-shallow-deep-equal"));
