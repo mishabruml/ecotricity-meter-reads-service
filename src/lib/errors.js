@@ -10,4 +10,14 @@ class ValidationError extends Error {
   }
 }
 
-module.exports = { ValidationError };
+class IdempotencyError extends Error {
+  constructor(idempotencyKey) {
+    super(idempotencyKey);
+    this.name = "IdempotencyError";
+    this.message = "An existing record matching the idempotency key was found";
+    this.idempotencyKey = idempotencyKey;
+    Error.captureStackTrace(this, IdempotencyError);
+  }
+}
+
+module.exports = { ValidationError, IdempotencyError };
