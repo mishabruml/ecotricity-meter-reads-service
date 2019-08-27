@@ -2,7 +2,9 @@
 const ReadingModel = require("../models/readingModel");
 
 module.exports = class ReadingModelController {
-  constructor() {}
+  constructor() {
+    this.hideFields = { _id: false, __v: false, idempotencyKey: false };
+  }
 
   async getAllRecords() {
     return await ReadingModel.find({}, { _id: false, __v: false })
@@ -58,7 +60,9 @@ module.exports = class ReadingModelController {
   }
 
   async dynamicGETquery(customerId, serialNumber, mpxn, readDate) {
-    let query = ReadingModel.find();
+    let query = ReadingModel.find({}, this.hideFields)
+      .sort({ readDate: -1 })
+      .lean();
 
     if (customerId) query.where({ customerId });
     if (serialNumber) query.where({ serialNumber });
