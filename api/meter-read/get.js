@@ -14,18 +14,21 @@ module.exports = async (req, res) => {
 
     validateGetQuerystrings(req.query);
 
-    const noQueries = Object.keys(req.query).length === 0;
+    // const noQueries = Object.keys(req.query).length === 0;
 
-    if (noQueries) {
-      console.log("no querystrings");
-      result = await readingModelController.getAllRecords();
-    }
+    // if (noQueries) {
+    //   console.log("no querystrings");
+    //   result = await readingModelController.getAllRecords();
+    // }
 
-    const { customerId, serialNumber, mpxn } = req.query;
+    const { customerId, serialNumber, mpxn, readDate } = req.query;
 
-    console.log(customerId, serialNumber, mpxn);
-
-    // result = await readingModelController.getOneByCustomerId(customerId);
+    result = await readingModelController.dynamicGETquery(
+      customerId,
+      serialNumber,
+      mpxn,
+      readDate
+    );
 
     console.log(result);
     res.send(result);

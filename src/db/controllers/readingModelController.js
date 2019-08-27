@@ -56,4 +56,15 @@ module.exports = class ReadingModelController {
       })
       .lean();
   }
+
+  async dynamicGETquery(customerId, serialNumber, mpxn, readDate) {
+    let query = ReadingModel.find();
+
+    if (customerId) query.where({ customerId });
+    if (serialNumber) query.where({ serialNumber });
+    if (mpxn) query.where({ mpxn });
+    if (readDate) query.where({ readDate });
+
+    return await query.exec();
+  }
 };
