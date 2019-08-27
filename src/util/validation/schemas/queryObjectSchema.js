@@ -1,4 +1,3 @@
-const { SERIAL_NUMBER_LENGTH, MPXN_LENGTH } = require("../../../lib/constants");
 const {
   customerIdSchema,
   serialNumberSchema,
