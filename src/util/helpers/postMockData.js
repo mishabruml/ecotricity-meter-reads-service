@@ -6,6 +6,9 @@ const postMockData = async () => {
   const mockData = await generateRandomReading();
   const req = { body: mockData };
   const res = {
+    status: code => {
+      console.log(code);
+    },
     send: () => {
       console.log("POST went OK!");
       console.log({ mockData });
