@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const validateGetQuerystrings = require("../../src/util/validation/get/validateGetQuerystrings");
+const validateGetQuerystrings = require("../../src/validation/get/validateGetQuerystrings");
 const ReadingModelController = require("../../src/db/controllers/readingModelController");
 const readingModelController = new ReadingModelController();
 

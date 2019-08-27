@@ -5,7 +5,7 @@ const { REQUIRED_READ_TYPES } = require("../src/lib/constants");
 const Chance = require("chance");
 const chance = new Chance();
 
-describe("Reading mongoose schema validation", () => {
+describe("ReadingModel mongoose schema validation", () => {
   it("should successfully create an instance of the model with valid data", async () => {
     const { body, headers } = generateRandomReading();
     const reading = body;
