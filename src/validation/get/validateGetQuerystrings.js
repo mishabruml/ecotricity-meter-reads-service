@@ -1,5 +1,5 @@
-const queryObjectSchema = require("../schemas/queryObjectSchema");
-const { QuerystringError } = require("../../../lib/errors");
+const queryObjectSchema = require("../../lib/schemas/queryObjectSchema");
+const { QuerystringError } = require("../../lib/errors");
 
 // JSON schema validation library - bulk of heavy lifting is done by the schema!
 const Ajv = require("ajv");
