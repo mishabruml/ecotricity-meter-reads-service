@@ -19,8 +19,8 @@ const validatePostIdempotency = async idempotencyKey => {
   // validate the idempotencyKey format
   let valid = ajv.validate(idempotencyKeySchema, idempotencyKey);
   if (!valid) {
-    console.log("idk invalid");
-    console.error(ajv.errors);
+    // console.log("idk invalid");
+    // console.error(ajv.errors);
     throw new ValidationError(
       `idempotency-key header ${ajv.errorsText()}`,
       (ajvErrors = ajv.errors)
