@@ -16,6 +16,11 @@ const post = async (req, res) => {
     const { body } = req;
     const idempotencyKey = req.headers["idempotency-key"];
 
+    // create reading entry in db from object
+    await mongoose.connect(process.env.PROD_DB_URI, {
+      useNewUrlParser: true
+    });
+
     // ensure the POST is idempotent
     const idempotentRequest = await validatePostIdempotency(idempotencyKey);
 
@@ -29,10 +34,6 @@ const post = async (req, res) => {
       const reading = body;
       reading.idempotencyKey = idempotencyKey;
 
-      // create reading entry in db from object
-      await mongoose.connect(process.env.PROD_DB_URI, {
-        useNewUrlParser: true
-      });
       const entry = await ReadingModel.create(reading);
       res.status(201);
       res.send(entry);
