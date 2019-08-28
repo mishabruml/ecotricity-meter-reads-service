@@ -1,7 +1,7 @@
 const { expect } = require("chai");
-const ReadingModel = require("../src/db/models/readingModel");
-const generateRandomReading = require("./util/generateRandomReading");
-const { REQUIRED_READ_TYPES } = require("../src/lib/constants");
+const ReadingModel = require("../../src/db/models/readingModel");
+const generateRandomReading = require("../util/generateRandomReading");
+const { REQUIRED_READ_TYPES } = require("../../src/lib/constants");
 const Chance = require("chance");
 const chance = new Chance();
 
