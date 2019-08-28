@@ -8,7 +8,7 @@ require("sinon-mongoose");
 const Chance = require("chance");
 const chance = new Chance();
 
-describe.only("ReadingModel db controller class", async () => {
+describe("ReadingModel db controller class", async () => {
   let readingModelController;
 
   beforeEach("instantiate the class", () => {
