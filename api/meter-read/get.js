@@ -7,41 +7,42 @@ const readingModelController = new ReadingModelController();
 const { QuerystringError } = require("../../src/lib/errors");
 const { GET_QUERY_ALLOWED_STRINGS } = require("../../src/lib/constants");
 
-module.exports = async (req, res) => {
+const get = async (req, res) => {
   try {
+    const { query } = req;
+
+    // validate the querystring object
+    await validateGetQuerystrings(query);
+
+    // get the readings fromt he db
     await mongoose.connect(process.env.PROD_DB_URI, { useNewUrlParser: true });
-    console.log({ query: req.query });
+    const results = await readingModelController.queryDbWithQueryObject(query);
 
-    validateGetQuerystrings(req.query);
-
-    // const noQueries = Object.keys(req.query).length === 0;
-
-    // if (noQueries) {
-    //   console.log("no querystrings");
-    //   result = await readingModelController.getAllRecords();
-    // }
-
-    const { customerId, serialNumber, mpxn, readDate } = req.query;
-
-    result = await readingModelController.dynamicGETquery(
-      customerId,
-      serialNumber,
-      mpxn,
-      readDate
-    );
-
-    console.log(result);
-    res.send(result);
+    // return results to client
+    if (results.length) res.send(results);
+    // handle 'no results' case
+    else
+      res
+        .status(404)
+        .send(`No reading(s) found for query ${JSON.stringify(query)}`);
   } catch (err) {
     console.error(err);
+
+    // Handle an invalid querystring
     if (err instanceof QuerystringError) {
       res
         .status(400)
         .send(
           `${err.name}: ${err.message}. Allowed query parameters: ${GET_QUERY_ALLOWED_STRINGS}`
         );
-    } else res.status(500).send("Server error");
+    } else {
+      // Handle any other errors
+      res.status(500).send(`Server error: ${err.message || ""}`);
+    }
   } finally {
+    // always disconnect from db
     await mongoose.disconnect();
   }
 };
+
+module.exports = get;
