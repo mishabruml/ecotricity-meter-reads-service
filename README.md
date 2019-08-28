@@ -102,10 +102,16 @@ If a matching meter reading can be found, the API responds with a status 200 and
 
 If a matching meter reading cannot be found, the API responds with status 404 and body: `No reading(s) found for query {"customerId":"ffec5567-3314-4e7c-b2a8-45456832762a"}`
 
+### POST /meter-read
+
+Endpoint used for putting new meter readings into the database. The reading data is sent via JSON in the POST body, and is strictly validated against the schema. The POST is also checked for idempotency and uniqueness- see the Idempotency section in [System Design](#system-design)
+
+The POST expects a request header `Idempotency-Key` which must be a `uuid`. Set your header in curl with the `-H` flag, you'll need to generate a uuid though. You could use [https://www.guidgenerator.com/](https://www.guidgenerator.com/) or something similar. My preferred method, however, is to send the requests in Postman, set the `Idempotency-Key` header, and use the `{{guid}}` global variable as the value. This will generate a `uuid` for you at runtime (when you hit send)
+
 ## System Design <a name="system-design"></a>
 
 ### API Design and Platform
-This service is built as a RESTful API using primarily Node.js. It is designed to be deployed as a serverless API, using [Now](https://zeit.co/) platform. This was chosen as it is free, open source (ish), and easy to get a live API up and running in no time. It is effectively a sugary wrapper around AWS Lambdas, so the Node.Js code that provides the actual valuable logic could easily be re-purposed onto a (more enterprise) API-Gateway/Lambda stack for instance. I chose not to do this myself since a) it would be fun to learn a new technology and b) I thought it would be more difficult and fiddly than using an out-the-box tool like Now. The API is designed to be RESTful, with a single endpoint `/meter-read` with two available methods, `GET` and `POST`, for accepting and presenting meter readings.
+This service is built as a RESTful API using primarily Node.js. It is designed to be deployed as a serverless API, using [Now](https://zeit.co/) platform. This was chosen as it is free, open source (ish), and easy to get a live API up and running in no time. It is effectively a sugary wrapper around AWS Lambdas, so the Node.Js code that provides the actual valuable logic could easily be re-purposed onto a (more enterprise) API-Gateway/Lambda stack for instance. I chose not to do this myself since a) it would be fun to learn a new technology and b) I thought it would be more difficult and fiddly than using an out-the-box tool like Now. The API is designed to be RESTful, with a single endpoint `/meter-read` with two available methods, `GET` and `POST`, for accepting and presenting meter readings. I wrote this API with a strong emphasis on strict data validation, at the request-level, and again at the database-level via schemas.
 
 
 ### Database
