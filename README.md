@@ -108,6 +108,8 @@ Endpoint used for putting new meter readings into the database. The reading data
 
 The POST expects a request header `Idempotency-Key` which must be a `uuid`. Set your header in curl with the `-H` flag, you'll need to generate a uuid though. You could use [https://www.guidgenerator.com/](https://www.guidgenerator.com/) or something similar. My preferred method, however, is to send the requests in Postman, set the `Idempotency-Key` header, and use the `{{guid}}` global variable as the value. This will generate a `uuid` for you at runtime (when you hit send)
 
+![](https://github.com/mishabruml/ecotricity-meter-reads-service/raw/master/assets/guidPostman.png "Using postman to create uuid")
+
 ## System Design <a name="system-design"></a>
 
 ### API Design and Platform
