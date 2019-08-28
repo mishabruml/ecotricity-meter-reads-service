@@ -1,6 +1,9 @@
-const validatePostIdempotency = require("../../src/util/validation/validatePostIdempotency");
-const { ValidationError, IdempotencyError } = require("../../src/lib/errors");
-const ReadingModelController = require("../../src/db/controllers/readingModelController");
+const validatePostIdempotency = require("../../../src/validation/post/validatePostIdempotency");
+const {
+  ValidationError,
+  IdempotencyError
+} = require("../../../src/lib/errors");
+const ReadingModelController = require("../../../src/db/controllers/readingModelController");
 
 const chai = require("chai");
 chai.use(require("chai-shallow-deep-equal"));

@@ -1,7 +1,7 @@
-const validatePostBody = require("../../src/util/validation/validatePostBody");
-const postBodySchema = require("../../src/util/validation/postBodySchema");
-const generateRandomReading = require("../util/generateRandomReading");
-const { ValidationError } = require("../../src/lib/errors");
+const validatePostBody = require("../../../src/validation/post/validatePostBody");
+const postBodySchema = require("../../../src/lib/schemas/postBodySchema");
+const generateRandomReading = require("../../util/generateRandomReading");
+const { ValidationError } = require("../../../src/lib/errors");
 const {
   SERIAL_NUMBER_LENGTH,
   MPXN_LENGTH,
@@ -9,7 +9,7 @@ const {
   REQUIRED_READ_TYPES,
   READ_VALUE_MIN,
   READ_VALUE_MAX
-} = require("../../src/lib/constants");
+} = require("../../../src/lib/constants");
 
 const chai = require("chai");
 const { expect } = chai;

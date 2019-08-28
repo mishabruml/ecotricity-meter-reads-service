@@ -1,25 +1,48 @@
 const mongoose = require("mongoose");
-const ReadingModel = require("../../src/db/models/readingModel");
+
+const validateGetQuerystrings = require("../../src/validation/get/validateGetQuerystrings");
 const ReadingModelController = require("../../src/db/controllers/readingModelController");
 const readingModelController = new ReadingModelController();
 
-module.exports = async (req, res) => {
+const { QuerystringError } = require("../../src/lib/errors");
+const { GET_QUERY_ALLOWED_STRINGS } = require("../../src/lib/constants");
+
+const get = async (req, res) => {
   try {
+    const { query } = req;
+
+    // validate the querystring object
+    await validateGetQuerystrings(query);
+
+    // get the readings fromt he db
     await mongoose.connect(process.env.PROD_DB_URI, { useNewUrlParser: true });
-    console.log({ method: req.method });
-    console.log({ query: req.query });
-    const { customerId } = req.query;
+    const results = await readingModelController.queryDbWithQueryObject(query);
 
-    let result;
-    if (!customerId) result = await readingModelController.getAllRecords();
-    else result = await readingModelController.getOneByCustomerId(customerId);
-
-    console.log(result);
-    res.send(result);
+    // return results to client
+    if (results.length) res.send(results);
+    // handle 'no results' case
+    else
+      res
+        .status(404)
+        .send(`No reading(s) found for query ${JSON.stringify(query)}`);
   } catch (err) {
     console.error(err);
-    res.status(500).send("Server error");
+
+    // Handle an invalid querystring
+    if (err instanceof QuerystringError) {
+      res
+        .status(400)
+        .send(
+          `${err.name}: ${err.message}. Allowed query parameters: ${GET_QUERY_ALLOWED_STRINGS}`
+        );
+    } else {
+      // Handle any other errors
+      res.status(500).send(`Server error: ${err.message || ""}`);
+    }
   } finally {
+    // always disconnect from db
     await mongoose.disconnect();
   }
 };
+
+module.exports = get;
