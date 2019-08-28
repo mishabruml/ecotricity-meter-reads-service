@@ -7,13 +7,17 @@ Ecotricity meter reads service! An API to accept/present customer's electricity 
 
 # Contents
 
+[Usage](#usage)
+
+[System Design](#system-design)
+
 [Initial Notes](#initial-notes)
 
 [Design ideas](#design-ideas)
 
 [Ponderings](#ponderings)
 
-## Usage
+## Usage <a name="usage"></a>
 
 ### API
 The API is deployed live at [https://ecotricity.now.sh/meter-read](https://ecotricity.now.sh/meter-read). Alternatively, see section "Developers" for information on how to run the server locally.
@@ -99,7 +103,7 @@ If a matching meter reading can be found, the API responds with a status 200 and
 
 If a matching meter reading cannot be found, the API responds with status 404 and body: `No reading(s) found for query {"customerId":"ffec5567-3314-4e7c-b2a8-45456832762a"}`
 
-## System Design
+## System Design <a name="system-design"></a>
 
 ### API Design and Platform
 This service is built as a RESTful API using primarily Node.js. It is designed to be deployed as a serverless API, using [Now](https://zeit.co/) platform. This was chosen as it is free, open source (ish), and easy to get a live API up and running in no time. It is effectively a sugary wrapper around AWS Lambdas, so the Node.Js code that provides the actual valuable logic could easily be re-purposed onto a (more enterprise) API-Gateway/Lambda stack for instance. I chose not to do this myself since a) it would be fun to learn a new technology and b) I thought it would be more difficult and fiddly than using an out-the-box tool like Now. The API is designed to be RESTful, with a single endpoint `/meter-read` with two available methods, `GET` and `POST`, for accepting and presenting meter readings.
