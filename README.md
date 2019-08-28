@@ -5,9 +5,172 @@
 
 Ecotricity meter reads service! An API to accept/present customer's electricity meter readings.
 
-## Notes
+# Contents
 
-### Design ideas
+[Usage](#usage)
+
+[System Design](#system-design)
+
+[Initial Notes](#initial-notes)
+
+[Design ideas](#design-ideas)
+
+[Ponderings](#ponderings)
+
+## Usage <a name="usage"></a>
+
+The API is deployed live at [https://ecotricity.now.sh/meter-read](https://ecotricity.now.sh/meter-read). Alternatively, see section "Developers" for information on how to run the server locally.
+
+Visiting that URL in a browser will of course send a `GET` request to the endpoint, and given there are no queries specified, will return all meter readings in the database. This is probably a bad design choice from a security perspective, but I built this API with simplicity and usability in mind; the code is modular enough that this functionality could be limited to admins only, or something like that.
+
+Anyway, the recommended tool to test this API well, rather than a browser, would be [curl](https://curl.haxx.se/) or more friendly, [Postman](https://www.getpostman.com/)
+
+### GET /meter-read
+
+Endpoint used for retrieving meter readings from the database. Meter readings are returned as JSON in the response body. Optionally specify parameters to query by, using querystrings. At time of writing, the allowed querystring parameters are:
+
+ - customerId 
+ - serialNumber 
+ - mpxn 
+ - readDate 
+ - createdAt
+
+Any call with a querystring that is *not* in the above list, or formatted incorrectly, will receive an appropriate API response;
+
+#### Disallowed querystring
+
+```bash
+curl -X GET \
+  'https://ecotricity.now.sh/meter-read?notallowedthis=data123' \
+  ```
+
+Receives response code 400, with message `QuerystringError: data should NOT have additional properties. Allowed query parameters: customerId,serialNumber,mpxn,readDate,createdAt`
+
+#### Invalid querystring format
+
+```bash
+curl -X GET \
+  'https://ecotricity.now.sh/meter-read?customerId=123abc' 
+  ```
+Note that `customerId` is `123abc`, which is not a valid [uuid](https://en.wikipedia.org/wiki/Universally_unique_identifier)
+
+Receives response code 400, with message `QuerystringError: data.customerId should match format "uuid". Allowed query parameters: customerId,serialNumber,mpxn,readDate,createdAt`
+
+#### Get all meter readings
+
+```bash
+curl -X GET \
+  'https://ecotricity.now.sh/meter-read' 
+  ```
+
+Response 200, returns all meter readings in database
+
+##### Get meter reading(s) for a specific parameter
+
+In this example, we are searching for readings for a specific `customerId`, but you could also search for any of the other allowed querystrings (mpxn, serialNumber...) on their own, or together, and in any combination, including all at once; just add them into the querystring.
+
+```bash
+curl -X GET \
+  'https://ecotricity.now.sh/meter-read?customerId=ffec5567-3314-4e7c-b2a8-45456832762a'
+ ```
+
+If a matching meter reading can be found, the API responds with a status 200 and `body`:
+
+```json
+[
+    {
+        "customerId": "ffec5567-3314-4e7c-b2a8-45456832762a",
+        "serialNumber": 32442325626,
+        "mpxn": "h9AhDhUt",
+        "read": [
+            {
+                "type": "ANYTIME",
+                "registerId": "NWemRz",
+                "value": 9945
+            },
+            {
+                "type": "NIGHT",
+                "registerId": "NWemRz",
+                "value": 3389
+            }
+        ],
+        "readDate": "2018-11-29T07:34:10.649Z",
+        "createdAt": "2019-08-28T12:36:37.256Z"
+    }
+]
+```
+
+If a matching meter reading cannot be found, the API responds with status 404 and body: `No reading(s) found for query {"customerId":"ffec5567-3314-4e7c-b2a8-45456832762a"}`
+
+### POST /meter-read
+
+Endpoint used for putting new meter readings into the database. The reading data is sent via JSON in the POST body, and is strictly validated against the schema. The POST is also checked for idempotency and uniqueness- see the Idempotency section in [System Design](#system-design)
+
+The POST expects a request header `Idempotency-Key` which must be a `uuid`. Set your header in curl with the `-H` flag, you'll need to generate a uuid though. You could use [https://www.guidgenerator.com/](https://www.guidgenerator.com/) or something similar. My preferred method, however, is to send the requests in Postman, set the `Idempotency-Key` header, and use the `{{guid}}` global variable as the value. This will generate a `uuid` for you at runtime (when you hit send)
+
+## System Design <a name="system-design"></a>
+
+### API Design and Platform
+This service is built as a RESTful API using primarily Node.js. It is designed to be deployed as a serverless API, using [Now](https://zeit.co/) platform. This was chosen as it is free, open source (ish), and easy to get a live API up and running in no time. It is effectively a sugary wrapper around AWS Lambdas, so the Node.Js code that provides the actual valuable logic could easily be re-purposed onto a (more enterprise) API-Gateway/Lambda stack for instance. I chose not to do this myself since a) it would be fun to learn a new technology and b) I thought it would be more difficult and fiddly than using an out-the-box tool like Now. The API is designed to be RESTful, with a single endpoint `/meter-read` with two available methods, `GET` and `POST`, for accepting and presenting meter readings. I wrote this API with a strong emphasis on strict data validation, at the request-level, and again at the database-level via schemas.
+
+
+### Database
+
+I chose the persistence layer to be MongoDB, mostly because I am familiar with it, and it works very conveniently with NodeJs. The database is deployed live to the cloud using a free-tier M0 sandbox cluster on [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
+
+### Schema
+
+My final schema looks like this (pseudocode):
+
+```
+{
+  customerId: {string, uuid},
+  serialNumber: {string, numeric, 11 chars},
+  mpxn: {string, alphanumeric, 8 chars}
+  read: [
+    { type: 'ANYTIME', registerId: {string, alphanumeric, 6 chars}, value: {number between 0 and 9999} },
+    { type: 'NIGHT', registerId: {string, alphanumeric, 6 chars}, value: {number between 0 and 9999} },  ]
+  readDate: {string, ISO date},
+  idempotencyKey: {string, uuid},
+  createdAt: {string, ISO date},
+}
+```
+
+*NB: in the db there will also be mongodb native `_id` and `_v` fields, not shown here.* 
+
+The string lengths (number of characters) and some other properties about the schema are not hardcoded; they can be controlled with constants set in `/src/lib/constants.js`
+
+I chose to add two fields to the schema. `idempotencyKey` is used to control POST request idempotency, as explained in the next section. `createdAt` is a field automatically created by MongoDB at the document creation time; it is therefore not required in the POST body. The createdAt date could be used for lots of useful things, such as determining when a customer *submitted* a reading, rather than when then the reading was taken from the meter, or in debugging - timestamps on errors in the server logs could be correlated with `createdAt` to find out if a bug was caused by creating a particular document.
+
+### Idempotency 
+
+Two measures were taken against idempotency in the POST route; the thing I wanted to avoid was creating the same resource twice for exactly the same request. 
+
+The "network duplication idempotency" problem manifests as exactly the same request hitting the POST route twice, caused by a network error/lag/automatic retry or similar. The request is identical in every way. I solved this problem by adding an `idempotencyKey` to my schema; every meter reading that is created expects a unique key. I chose `guid` as my key, as its guaranteed to be unique, commonly used, and easy to work with. The `idempotencyKey` is set as a header in the POST request, **and so must be generated at the time of sending by the client**. When the request hits the server, the key is checked against entries in the db, and if no matches are found, the request is assumed to be genuinely unique, and is processes.
+
+The second idempotency problem manifests as "client accidently sending exactly the same POST body twice or more. This will mean they have distinct `idempotencyKey`headers for each request, but the body will be identical. I solved this with a validation mechanism that checks the database for an exact match for the incoming request, and if found, the server responds with code 409 conflict, and a handy message about the duplication.
+
+### Deployment, CI/CD, testing, DevOps, other goodies
+
+This codebase is hosted on github, which was chosen because I am really comfortable with it. I used it's features extensively, even for a team of 1 (me) things like PR's were really handy.
+
+One of the great things about Now, is the out-the-box continuous deployments when configured with github; Now sits on top of github as a github 'app' and deploys my app for me. `master` and `dev` branches have special status, as the master branch deploys to my main production environment and URL, and `dev` to a dev environment, but also *any* feature branch is deployed at it's own staging url. This is super handy for development and allowed me to move really fast and hassle-free, and allowed regular testing of the API in a deployed context.
+
+The test suite is written in [mocha](https://mochajs.org/) see test section for more on that specifically. Code coverage is provided by [nyc/istanbul](https://istanbul.js.org/), and the reporting is provided by [codecov](https://codecov.io/). I wrote some npm scripts (see `package.json`) to test my code, run a coverage report, and upload it to my Codecov account. This can be linked to my github repo, which is what me gives me my shiny coverage % badge, at the top of this page!
+
+The thing missing from Now was automated testing (and any other automation); so I set it up myself with [circleci](https://circleci.com/). Another free service, this is essentially Cloud-based linux containers/VMs to run whatever you like in, but specifically designed for CI/CD. I created a simple config script that checks out my project code, builds, and runs the mocha test suite. It will 'fail' the build for a failure in the connection to github, an npm build failure, or any failing test. The script then invokes my test coverage and reporting scripts to automatically keep my coverage stats up to date.
+
+I installed the Now, CircleCi and CodeCov github apps, which means my github is all linked to these outside services. I made branch protection rules, enforcing status checks for the CircleCi and Now stages, which means that for any branch pushed to my repo, the unit test suite is ran, code coverage reports made and uploaded, and a deployment made. If any of those stages fail, the status check will fail, meaning that the branch cannot be merged into the main code-base. 
+
+Once set up, this gave me much more confidence in my development, to try out wacky things, move quickly, and be sure that my safety net would catch me if I did anything daft (and trust me, I did- so it worked!)
+
+### Other
+
+The codebase is as modular as possible, and focuses on consistency, abstraction, reliability, scalability, fault-tolerance and error-handling. **Not** considered (much) were: performance, speed, latency, security.
+	
+## Initial Notes - written before I started any code<a name="initial-notes"></a>
+
+### Design ideas <a name="design-ideas"></a>
 
 - Clearly we need some kind of API that serves requests (GET, POST) at `/meter-read`
 - Use node.js to write a RESTful API and mongodb for the persistence store- personally most experienced in this, will minimise time spent on set-up, can concentrate on business logic
@@ -25,7 +188,7 @@ Ecotricity meter reads service! An API to accept/present customer's electricity 
 - CICD: Use circleCI, experienced in this. Now will handle the deployments, but circlci can sit in front of Now deployments https://zeit.co/docs/v2/advanced/now-for-github#extending-your-github-workflow this means the unit test suite and code coverage can sit in the CI pipeline ahead of the Now CD using github deployment/status checks. Can probably even get a code coverage badge for the github repo :D
 - Global uniqueness of the customerId - use uuidv4, consistent with mongodb indexing
 
-### Initial queries
+### Ponderings <a name="ponderings"></a>
 
 - Should the system accept multiple readings for a single customerId? Would this update the reading (arguably a PUT request) or create a new db entry for the read, same customerId and meter meta-data, different date and values. If yes, then customerId cannot be used to index the database (not unique). Also this would add further complexity; find previous entry, validate the incoming date is later, validate the meter read values have increased, so on. For an MVP, allowing 1 reading per customerId would make things a lot simpler. However, designing a system where customerId MUST be unique could cause problems later if someone wanted to add this functionality back in.
 - Can 2 customerIds share a single meter serial number? Would this equate to 2 customers paying for electricity distinctly, off of a shared single meter? Doesn't sound possible. In this case, a 'serialNumber' is quite tightly bound to 'customerId'
