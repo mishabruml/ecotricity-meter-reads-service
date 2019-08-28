@@ -112,6 +112,30 @@ This service is built as a RESTful API using primarily Node.js. It is designed t
 
 I chose the persistence layer to be MongoDB, mostly because I am familiar with it, and it works very conveniently with NodeJs. The database is deployed live to the cloud using a free-tier M0 sandbox cluster on [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
 
+### Schema
+
+My final schema looks like this (pseudocode):
+
+```
+{
+  customerId: {string, uuid},
+  serialNumber: {string, numeric, 11 chars},
+  mpxn: {string, alphanumeric, 8 chars}
+  read: [
+    { type: 'ANYTIME', registerId: {string, alphanumeric, 6 chars}, value: {number between 0 and 9999} },
+    { type: 'NIGHT', registerId: {string, alphanumeric, 6 chars}, value: {number between 0 and 9999} },  ]
+  readDate: {string, ISO date},
+  idempotencyKey: {string, uuid},
+  createdAt: {string, ISO date},
+}
+```
+
+*NB: in the db there will also be mongodb native `_id` and `_v` fields, not shown here.* 
+
+The string lengths (number of characters) and some other properties about the schema are not hardcoded; they can be controlled with constants set in `/src/lib/constants.js`
+
+I chose to add two fields to the schema. `idempotencyKey` is used to control POST request idempotency, as explained in the next section. `createdAt` is a field automatically created by MongoDB at the document creation time; it is therefore not required in the POST body. The createdAt date could be used for lots of useful things, such as determining when a customer *submitted* a reading, rather than when then the reading was taken from the meter, or in debugging - timestamps on errors in the server logs could be correlated with `createdAt` to find out if a bug was caused by creating a particular document.
+
 ### Idempotency 
 
 Two measures were taken against idempotency in the POST route; the thing I wanted to avoid was creating the same resource twice for exactly the same request. 
