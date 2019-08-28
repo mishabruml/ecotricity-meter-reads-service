@@ -6,8 +6,11 @@
 Ecotricity meter reads service! An API to accept/present customer's electricity meter readings.
 
 # Contents
+
 [Initial Notes](#initial-notes)
+
 [Design ideas](#design-ideas)
+
 [Ponderings](#ponderings)
 	
 ## Initial Notes <a name="initial-notes"></a>
