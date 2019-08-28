@@ -110,6 +110,62 @@ The POST expects a request header `Idempotency-Key` which must be a `uuid`. Set 
 
 ![](https://github.com/mishabruml/ecotricity-meter-reads-service/raw/master/assets/guidPostman.png "Using postman to create uuid")
 
+#### POST a valid meter reading
+
+```bash
+curl -X POST \
+  https://ecotricity.now.sh/meter-read \
+  -H 'Content-Type: application/json' \
+  -H 'Idempotency-Key: b5dbc3e0-e444-4058-8bc0-1e20ce1bb835' \
+  -d '{
+    "customerId": "ffec5567-3314-4e7c-b2a8-45456832762b",
+    "serialNumber": "32442325626",
+    "mpxn": "h9AhDhUt",
+    "read": [
+        {
+            "type": "ANYTIME",
+            "registerId": "NWemRz",
+            "value": 9945
+        },
+        {
+            "type": "NIGHT",
+            "registerId": "NWemRz",
+            "value": 3389
+        }
+    ],
+    "readDate": "2018-11-29T07:34:10.649Z"
+}'
+```
+
+This will respond with status code 201 and body JSON with the created resource:
+
+```JSON
+{
+    "_id": "5d66c3c3f119d200072c48d8",
+    "customerId": "ffec5567-3314-4e7c-b2a8-45456832762b",
+    "serialNumber": "32442325626",
+    "mpxn": "h9AhDhUt",
+    "read": [
+        {
+            "type": "ANYTIME",
+            "registerId": "NWemRz",
+            "value": 9945
+        },
+        {
+            "type": "NIGHT",
+            "registerId": "NWemRz",
+            "value": 3389
+        }
+    ],
+    "readDate": "2018-11-29T07:34:10.649Z",
+    "idempotencyKey": "e75ee154-0834-4d95-b3c7-97ec9a30761e",
+    "createdAt": "2019-08-28T18:11:15.200Z",
+    "__v": 0
+}
+```
+
+Note that the server returns the full mongodb document, with all fields. This is really for developers, its useful to quickly be able to reference the document in the database at a later time. 
+
 ## System Design <a name="system-design"></a>
 
 ### API Design and Platform
