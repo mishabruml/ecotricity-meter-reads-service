@@ -26,4 +26,7 @@ const postMockData = async () => {
   return mockRequest;
 };
 
-postMockData();
+// self-invoking async fn
+(async () => {
+  await postMockData();
+})();
