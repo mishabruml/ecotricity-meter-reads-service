@@ -17,7 +17,7 @@ const readingSchema = new mongoose.Schema(
   {
     customerId: { type: String, required: true, index: true },
     idempotencyKey: { type: String, required: true, index: true, unique: true },
-    serialNumber: { type: Number, required: true },
+    serialNumber: { type: String, required: true },
     mpxn: { type: String, required: true },
     read: { type: [readSchema], required: true },
     readDate: { type: Date, required: true }
