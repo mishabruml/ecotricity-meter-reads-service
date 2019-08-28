@@ -6,11 +6,13 @@
 Ecotricity meter reads service! An API to accept/present customer's electricity meter readings.
 
 # Contents
-1. [Initial Notes](#initial-notes)
-
+[Initial Notes](#initial-notes)
+[Design ideas](#design-ideas)
+[Ponderings](#ponderings)
+	
 ## Initial Notes <a name="initial-notes"></a>
 
-### Design ideas
+### Design ideas <a name="design-ideas"></a>
 
 - Clearly we need some kind of API that serves requests (GET, POST) at `/meter-read`
 - Use node.js to write a RESTful API and mongodb for the persistence store- personally most experienced in this, will minimise time spent on set-up, can concentrate on business logic
@@ -28,7 +30,7 @@ Ecotricity meter reads service! An API to accept/present customer's electricity 
 - CICD: Use circleCI, experienced in this. Now will handle the deployments, but circlci can sit in front of Now deployments https://zeit.co/docs/v2/advanced/now-for-github#extending-your-github-workflow this means the unit test suite and code coverage can sit in the CI pipeline ahead of the Now CD using github deployment/status checks. Can probably even get a code coverage badge for the github repo :D
 - Global uniqueness of the customerId - use uuidv4, consistent with mongodb indexing
 
-### Initial queries
+### Ponderings <a name="ponderings"></a>
 
 - Should the system accept multiple readings for a single customerId? Would this update the reading (arguably a PUT request) or create a new db entry for the read, same customerId and meter meta-data, different date and values. If yes, then customerId cannot be used to index the database (not unique). Also this would add further complexity; find previous entry, validate the incoming date is later, validate the meter read values have increased, so on. For an MVP, allowing 1 reading per customerId would make things a lot simpler. However, designing a system where customerId MUST be unique could cause problems later if someone wanted to add this functionality back in.
 - Can 2 customerIds share a single meter serial number? Would this equate to 2 customers paying for electricity distinctly, off of a shared single meter? Doesn't sound possible. In this case, a 'serialNumber' is quite tightly bound to 'customerId'
