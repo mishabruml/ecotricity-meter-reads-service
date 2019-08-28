@@ -10,6 +10,7 @@ class ValidationError extends Error {
   }
 }
 
+// Thrown when idempotent POST requests are encountered
 class IdempotencyError extends Error {
   constructor(idempotencyKey) {
     super(idempotencyKey);
@@ -20,6 +21,7 @@ class IdempotencyError extends Error {
   }
 }
 
+// Thrown when POST request body matches record(s) found in database
 class DuplicateError extends Error {
   constructor(body) {
     super(body);
@@ -30,4 +32,19 @@ class DuplicateError extends Error {
   }
 }
 
-module.exports = { ValidationError, IdempotencyError, DuplicateError };
+// Thrown when GET request query object data is invalid
+class QuerystringError extends Error {
+  constructor(...args) {
+    super(...args);
+    this.name = "QuerystringError";
+    this.ajvErrors = ajvErrors;
+    Error.captureStackTrace(this, QuerystringError);
+  }
+}
+
+module.exports = {
+  ValidationError,
+  IdempotencyError,
+  DuplicateError,
+  QuerystringError
+};

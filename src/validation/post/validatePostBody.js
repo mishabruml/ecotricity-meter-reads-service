@@ -1,4 +1,4 @@
-const postBodySchema = require("./postBodySchema");
+const postBodySchema = require("../../lib/schemas/postBodySchema");
 const { ValidationError } = require("../../lib/errors");
 
 // JSON schema validation library - bulk of heavy lifting is done by the schema!
