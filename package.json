@@ -4,10 +4,10 @@
   "description": "Ecotricity demo API for accepting and presenting customer meter readings",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --recursive --forbidOnly",
-    "test-coverage": "nyc npm test",
+    "test": "mocha --recursive",
+    "test:all": "mocha --recursive --forbidOnly",
+    "test-coverage": "nyc npm run test:all",
     "report-coverage": "nyc report --reporter=text-lcov > coverage.lcov && codecov",
-    "test-cover-report": "npm run test-coverage && npm run report-coverage",
     "post-mock-data": "node ./src/util/helpers/postMockData.js"
   },
   "repository": {
