@@ -19,14 +19,13 @@ Ecotricity meter reads service! An API to accept/present customer's electricity 
 
 ## Usage <a name="usage"></a>
 
-### API
 The API is deployed live at [https://ecotricity.now.sh/meter-read](https://ecotricity.now.sh/meter-read). Alternatively, see section "Developers" for information on how to run the server locally.
 
 Visiting that URL in a browser will of course send a `GET` request to the endpoint, and given there are no queries specified, will return all meter readings in the database. This is probably a bad design choice from a security perspective, but I built this API with simplicity and usability in mind; the code is modular enough that this functionality could be limited to admins only, or something like that.
 
 Anyway, the recommended tool to test this API well, rather than a browser, would be [curl](https://curl.haxx.se/) or more friendly, [Postman](https://www.getpostman.com/)
 
-#### GET /meter-read
+### GET /meter-read
 
 Endpoint used for retrieving meter readings from the database. Meter readings are returned as JSON in the response body. Optionally specify parameters to query by, using querystrings. At time of writing, the allowed querystring parameters are:
 
@@ -38,7 +37,7 @@ Endpoint used for retrieving meter readings from the database. Meter readings ar
 
 Any call with a querystring that is *not* in the above list, or formatted incorrectly, will receive an appropriate API response;
 
-##### Disallowed querystring
+#### Disallowed querystring
 
 ```bash
 curl -X GET \
@@ -47,7 +46,7 @@ curl -X GET \
 
 Receives response code 400, with message `QuerystringError: data should NOT have additional properties. Allowed query parameters: customerId,serialNumber,mpxn,readDate,createdAt`
 
-##### Invalid querystring format
+#### Invalid querystring format
 
 ```bash
 curl -X GET \
@@ -57,7 +56,7 @@ Note that `customerId` is `123abc`, which is not a valid [uuid](https://en.wikip
 
 Receives response code 400, with message `QuerystringError: data.customerId should match format "uuid". Allowed query parameters: customerId,serialNumber,mpxn,readDate,createdAt`
 
-##### Get all meter readings
+#### Get all meter readings
 
 ```bash
 curl -X GET \
@@ -120,6 +119,20 @@ Two measures were taken against idempotency in the POST route; the thing I wante
 The "network duplication idempotency" problem manifests as exactly the same request hitting the POST route twice, caused by a network error/lag/automatic retry or similar. The request is identical in every way. I solved this problem by adding an `idempotencyKey` to my schema; every meter reading that is created expects a unique key. I chose `guid` as my key, as its guaranteed to be unique, commonly used, and easy to work with. The `idempotencyKey` is set as a header in the POST request, **and so must be generated at the time of sending by the client**. When the request hits the server, the key is checked against entries in the db, and if no matches are found, the request is assumed to be genuinely unique, and is processes.
 
 The second idempotency problem manifests as "client accidently sending exactly the same POST body twice or more. This will mean they have distinct `idempotencyKey`headers for each request, but the body will be identical. I solved this with a validation mechanism that checks the database for an exact match for the incoming request, and if found, the server responds with code 409 conflict, and a handy message about the duplication.
+
+### Deployment, CI/CD, testing, DevOps, other goodies
+
+This codebase is hosted on github, which was chosen because I am really comfortable with it. I used it's features extensively, even for a team of 1 (me) things like PR's were really handy.
+
+One of the great things about Now, is the out-the-box continuous deployments when configured with github; Now sits on top of github as a github 'app' and deploys my app for me. `master` and `dev` branches have special status, as the master branch deploys to my main production environment and URL, and `dev` to a dev environment, but also *any* feature branch is deployed at it's own staging url. This is super handy for development and allowed me to move really fast and hassle-free, and allowed regular testing of the API in a deployed context.
+
+The test suite is written in [mocha](https://mochajs.org/) see test section for more on that specifically. Code coverage is provided by [nyc/istanbul](https://istanbul.js.org/), and the reporting is provided by [codecov](https://codecov.io/). I wrote some npm scripts (see `package.json`) to test my code, run a coverage report, and upload it to my Codecov account. This can be linked to my github repo, which is what me gives me my shiny coverage % badge, at the top of this page!
+
+The thing missing from Now was automated testing (and any other automation); so I set it up myself with [circleci](https://circleci.com/). Another free service, this is essentially Cloud-based linux containers/VMs to run whatever you like in, but specifically designed for CI/CD. I created a simple config script that checks out my project code, builds, and runs the mocha test suite. It will 'fail' the build for a failure in the connection to github, an npm build failure, or any failing test. The script then invokes my test coverage and reporting scripts to automatically keep my coverage stats up to date.
+
+I installed the Now, CircleCi and CodeCov github apps, which means my github is all linked to these outside services. I made branch protection rules, enforcing status checks for the CircleCi and Now stages, which means that for any branch pushed to my repo, the unit test suite is ran, code coverage reports made and uploaded, and a deployment made. If any of those stages fail, the status check will fail, meaning that the branch cannot be merged into the main code-base. 
+
+Once set up, this gave me much more confidence in my development, to try out wacky things, move quickly, and be sure that my safety net would catch me if I did anything daft (and trust me, I did- so it worked!)
 
 ### Other
 
