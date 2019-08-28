@@ -26,8 +26,9 @@ describe.only("ReadingModel db controller class", async () => {
     const _id = "fake_mongo_id";
 
     // Mock (stub) the model native find command to return the seed data
-    const findMock = sinon
-      .mock(ReadingModel)
+    const findMock = sinon.mock(ReadingModel);
+
+    findMock
       .expects("find")
       .withArgs({ idempotencyKey }, { idempotencyKey: true, _id: true })
       .chain("sort")
@@ -40,8 +41,8 @@ describe.only("ReadingModel db controller class", async () => {
       idempotencyKey
     );
 
-    expect(result).to.deep.eql({ idempotencyKey, _id });
-
     findMock.restore();
+
+    expect(result).to.deep.eql({ idempotencyKey, _id });
   });
 });
