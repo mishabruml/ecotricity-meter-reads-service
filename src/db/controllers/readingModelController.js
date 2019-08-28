@@ -16,7 +16,7 @@ module.exports = class ReadingModelController {
   async getAllByIdempotencyKey(idempotencyKey) {
     return await ReadingModel.find(
       { idempotencyKey },
-      { idempotencyKey: true, _id: true, __v: false } // only need to project idempotencyKey and doc _id
+      { idempotencyKey: true, _id: true } // only need to project idempotencyKey and doc _id
     )
       .sort({
         createdAt: -1 // sort by createdAt, since it's likely the offending doc will be recently created
