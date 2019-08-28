@@ -2,7 +2,8 @@ const {
   customerIdSchema,
   serialNumberSchema,
   mpxnSchema,
-  readDateSchema
+  readDateSchema,
+  createdAtSchema
 } = require("./ajvSchemas");
 
 const queryObjectSchema = {
@@ -11,7 +12,8 @@ const queryObjectSchema = {
     customerId: customerIdSchema,
     serialNumber: serialNumberSchema,
     mpxn: mpxnSchema,
-    readDate: readDateSchema
+    readDate: readDateSchema,
+    createdAt: createdAtSchema
   },
   additionalProperties: false
 };

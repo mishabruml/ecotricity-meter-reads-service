@@ -8,7 +8,8 @@
     "test:all": "mocha --recursive --forbidOnly",
     "test-coverage": "nyc npm run test:all",
     "report-coverage": "nyc report --reporter=text-lcov > coverage.lcov && codecov",
-    "post-mock-data": "node ./src/util/helpers/postMockData.js"
+    "post-mock-data": "node ./src/util/helpers/postMockData.js",
+    "cloc": "cloc --exclude-list-file=.clocignore ."
   },
   "repository": {
     "type": "git",
@@ -31,11 +32,13 @@
     "chai": "^4.2.0",
     "chai-shallow-deep-equal": "^1.4.6",
     "chance": "^1.0.18",
+    "cloc": "^2.5.0",
     "codecov": "^3.5.0",
     "dotenv": "^8.1.0",
     "mocha": "^6.2.0",
     "nyc": "^14.1.1",
     "sinon": "^7.4.1",
+    "sinon-mongoose": "^2.3.0",
     "uuid": "^3.3.3"
   }
 }

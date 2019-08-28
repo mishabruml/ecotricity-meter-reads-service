@@ -18,7 +18,8 @@ const GET_QUERY_ALLOWED_STRINGS = [
   "customerId",
   "serialNumber",
   "mpxn",
-  "readDate"
+  "readDate",
+  "createdAt"
 ];
 
 module.exports = {

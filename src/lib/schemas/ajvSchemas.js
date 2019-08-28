@@ -64,7 +64,10 @@ const readSchema = {
   additionalItems: false,
   minItems: REQUIRED_READ_TYPES.length
 };
+
 const readDateSchema = { type: "string", format: "date-time" };
+
+const createdAtSchema = { type: "string", format: "date-time" };
 
 module.exports = {
   registerIdSchema,
@@ -74,5 +77,6 @@ module.exports = {
   serialNumberSchema,
   mpxnSchema,
   readSchema,
-  readDateSchema
+  readDateSchema,
+  createdAtSchema
 };
