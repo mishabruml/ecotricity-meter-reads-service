@@ -11,9 +11,8 @@ const {
 
 const ReadingModel = require("../../src/db/models/readingModel");
 
-module.exports = async (req, res) => {
+const post = async (req, res) => {
   try {
-    await mongoose.connect(process.env.PROD_DB_URI, { useNewUrlParser: true });
     const { body } = req;
     const idempotencyKey = req.headers["idempotency-key"];
 
@@ -26,11 +25,14 @@ module.exports = async (req, res) => {
     const uniqueRequestData = await validateDataUniqueness(body);
 
     if (idempotentRequest && validBodyData && uniqueRequestData) {
-      // combine the body and idempotency key into a single object
+      // combine the body and idempotency key into the single reading object
       const reading = body;
       reading.idempotencyKey = idempotencyKey;
 
       // create reading entry in db from object
+      await mongoose.connect(process.env.PROD_DB_URI, {
+        useNewUrlParser: true
+      });
       const entry = await ReadingModel.create(reading);
       res.status(201);
       res.send(entry);
@@ -54,3 +56,5 @@ module.exports = async (req, res) => {
     await mongoose.disconnect();
   }
 };
+
+module.exports = post;
