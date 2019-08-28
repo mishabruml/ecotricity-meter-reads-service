@@ -12,8 +12,116 @@ Ecotricity meter reads service! An API to accept/present customer's electricity 
 [Design ideas](#design-ideas)
 
 [Ponderings](#ponderings)
+
+## Usage
+
+### API
+The API is deployed live at [https://ecotricity.now.sh/meter-read](https://ecotricity.now.sh/meter-read). Alternatively, see section "Developers" for information on how to run the server locally.
+
+Visiting that URL in a browser will of course send a `GET` request to the endpoint, and given there are no queries specified, will return all meter readings in the database. This is probably a bad design choice from a security perspective, but I built this API with simplicity and usability in mind; the code is modular enough that this functionality could be limited to admins only, or something like that.
+
+Anyway, the recommended tool to test this API well, rather than a browser, would be [curl](https://curl.haxx.se/) or more friendly, [Postman](https://www.getpostman.com/)
+
+#### GET /meter-read
+
+Endpoint used for retrieving meter readings from the database. Meter readings are returned as JSON in the response body. Optionally specify parameters to query by, using querystrings. At time of writing, the allowed querystring parameters are:
+
+ - customerId 
+ - serialNumber 
+ - mpxn 
+ - readDate 
+ - createdAt
+
+Any call with a querystring that is *not* in the above list, or formatted incorrectly, will receive an appropriate API response;
+
+##### Disallowed querystring
+
+```bash
+curl -X GET \
+  'https://ecotricity.now.sh/meter-read?notallowedthis=data123' \
+  ```
+
+Receives response code 400, with message `QuerystringError: data should NOT have additional properties. Allowed query parameters: customerId,serialNumber,mpxn,readDate,createdAt`
+
+##### Invalid querystring format
+
+```bash
+curl -X GET \
+  'https://ecotricity.now.sh/meter-read?customerId=123abc' 
+  ```
+Note that `customerId` is `123abc`, which is not a valid [uuid](https://en.wikipedia.org/wiki/Universally_unique_identifier)
+
+Receives response code 400, with message `QuerystringError: data.customerId should match format "uuid". Allowed query parameters: customerId,serialNumber,mpxn,readDate,createdAt`
+
+##### Get all meter readings
+
+```bash
+curl -X GET \
+  'https://ecotricity.now.sh/meter-read' 
+  ```
+
+Response 200, returns all meter readings in database
+
+##### Get meter reading(s) for a specific parameter
+
+In this example, we are searching for readings for a specific `customerId`, but you could also search for any of the other allowed querystrings (mpxn, serialNumber...) on their own, or together, and in any combination, including all at once; just add them into the querystring.
+
+```bash
+curl -X GET \
+  'https://ecotricity.now.sh/meter-read?customerId=ffec5567-3314-4e7c-b2a8-45456832762a'
+ ```
+
+If a matching meter reading can be found, the API responds with a status 200 and `body`:
+
+```json
+[
+    {
+        "customerId": "ffec5567-3314-4e7c-b2a8-45456832762a",
+        "serialNumber": 32442325626,
+        "mpxn": "h9AhDhUt",
+        "read": [
+            {
+                "type": "ANYTIME",
+                "registerId": "NWemRz",
+                "value": 9945
+            },
+            {
+                "type": "NIGHT",
+                "registerId": "NWemRz",
+                "value": 3389
+            }
+        ],
+        "readDate": "2018-11-29T07:34:10.649Z",
+        "createdAt": "2019-08-28T12:36:37.256Z"
+    }
+]
+```
+
+If a matching meter reading cannot be found, the API responds with status 404 and body: `No reading(s) found for query {"customerId":"ffec5567-3314-4e7c-b2a8-45456832762a"}`
+
+## System Design
+
+### API Design and Platform
+This service is built as a RESTful API using primarily Node.js. It is designed to be deployed as a serverless API, using [Now](https://zeit.co/) platform. This was chosen as it is free, open source (ish), and easy to get a live API up and running in no time. It is effectively a sugary wrapper around AWS Lambdas, so the Node.Js code that provides the actual valuable logic could easily be re-purposed onto a (more enterprise) API-Gateway/Lambda stack for instance. I chose not to do this myself since a) it would be fun to learn a new technology and b) I thought it would be more difficult and fiddly than using an out-the-box tool like Now. The API is designed to be RESTful, with a single endpoint `/meter-read` with two available methods, `GET` and `POST`, for accepting and presenting meter readings.
+
+
+### Database
+
+I chose the persistence layer to be MongoDB, mostly because I am familiar with it, and it works very conveniently with NodeJs. The database is deployed live to the cloud using a free-tier M0 sandbox cluster on [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
+
+### Idempotency 
+
+Two measures were taken against idempotency in the POST route; the thing I wanted to avoid was creating the same resource twice for exactly the same request. 
+
+The "network duplication idempotency" problem manifests as exactly the same request hitting the POST route twice, caused by a network error/lag/automatic retry or similar. The request is identical in every way. I solved this problem by adding an `idempotencyKey` to my schema; every meter reading that is created expects a unique key. I chose `guid` as my key, as its guaranteed to be unique, commonly used, and easy to work with. The `idempotencyKey` is set as a header in the POST request, **and so must be generated at the time of sending by the client**. When the request hits the server, the key is checked against entries in the db, and if no matches are found, the request is assumed to be genuinely unique, and is processes.
+
+The second idempotency problem manifests as "client accidently sending exactly the same POST body twice or more. This will mean they have distinct `idempotencyKey`headers for each request, but the body will be identical. I solved this with a validation mechanism that checks the database for an exact match for the incoming request, and if found, the server responds with code 409 conflict, and a handy message about the duplication.
+
+### Other
+
+The codebase is as modular as possible, and focuses on consistency, abstraction, reliability, scalability, fault-tolerance and error-handling. **Not** considered (much) were: performance, speed, latency, security.
 	
-## Initial Notes <a name="initial-notes"></a>
+## Initial Notes - written before I started any code<a name="initial-notes"></a>
 
 ### Design ideas <a name="design-ideas"></a>
 
