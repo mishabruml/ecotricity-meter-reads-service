@@ -19,7 +19,7 @@ Ecotricity meter reads service! An API to accept/present customer's electricity 
 
 ## Usage <a name="usage"></a>
 
-The API is deployed live at [https://ecotricity.now.sh/meter-read](https://ecotricity.now.sh/meter-read). Alternatively, see section "Developers" for information on how to run the server locally.
+The API is deployed live at [https://ecotricity.now.sh/meter-read](https://ecotricity.now.sh/meter-read). Alternatively, see section [Developers](#developers) for information on how to run the server locally.
 
 Visiting that URL in a browser will of course send a `GET` request to the endpoint, and given there are no queries specified, will return all meter readings in the database. This is probably a bad design choice from a security perspective, but I built this API with simplicity and usability in mind; the code is modular enough that this functionality could be limited to admins only, or something like that.
 
@@ -104,7 +104,7 @@ If no matching meter reading(s) cannot be found, the API responds with status 40
 
 ### POST /meter-read
 
-Endpoint used for putting new meter readings into the database. The reading data is sent via JSON in the POST body, and is strictly validated against the schema. The POST is also checked for idempotency and uniqueness- see the Idempotency section in [System Design](#system-design). Finding it fiddly to come up with unique POST bodies or arduous to generate "authentic" random customer data? Don't worry, I've written a tool to do it for you! See the Dev Tools section in [Developers](developers). You'll need to have the system set up locally, though. 
+Endpoint used for putting new meter readings into the database. The reading data is sent via JSON in the POST body, and is strictly validated against the schema. The POST is also checked for idempotency and uniqueness- see the Idempotency section in [System Design](#system-design). Finding it fiddly to come up with unique POST bodies or arduous to generate "authentic" random customer data? Don't worry, I've written a tool to do it for you! See the Dev Tools section in [Developers](#developers). You'll need to have the system set up locally, though. 
 
 The POST expects a request header `Idempotency-Key` which must be a `uuid`. Set your header in curl with the `-H` flag, you'll need to generate a uuid though. You could use [https://www.guidgenerator.com/](https://www.guidgenerator.com/) or something similar. My preferred method, however, is to send the requests in Postman, set the `Idempotency-Key` header, and use the `{{guid}}` global variable as the value. This will generate a `uuid` for you at runtime (when you hit send)
 
@@ -322,7 +322,7 @@ This codebase is hosted on github, which was chosen because I am really comforta
 
 The app is deployed to Now platform; one of the great things about Now, is the out-the-box continuous deployments when configured with github; Now sits on top of github as a github 'app' and deploys my app for me. `master` and `dev` branches have special status, as the master branch deploys to my main production environment and URL, and `dev` to a dev environment, but also *any* feature branch is deployed at it's own staging url. This is super handy for development and allowed me to move really fast and hassle-free, and allowed regular testing of the API in a deployed context.
 
-The test suite is written in [mocha](https://mochajs.org/) see test section for more on that specifically. Code coverage is provided by [nyc/istanbul](https://istanbul.js.org/), and the reporting is provided by [codecov](https://codecov.io/). I wrote some npm scripts (see `package.json`) to test my code, run a coverage report, and upload it to my Codecov account. This can be linked to my github repo, which is what me gives me my shiny coverage % badge, at the top of this page!
+The test suite is written in [mocha](https://mochajs.org/) see test section in [developers](#developers) for more on that specifically. Code coverage is provided by [nyc/istanbul](https://istanbul.js.org/), and the reporting is provided by [codecov](https://codecov.io/). I wrote some npm scripts (see `package.json`) to test my code, run a coverage report, and upload it to my Codecov account. This can be linked to my github repo, which is what me gives me my shiny coverage % badge, at the top of this page!
 
 The thing missing from Now was automated testing (and any other automation); so I set it up myself with [circleci](https://circleci.com/). Another free service, this is essentially Cloud-based linux containers/VMs to run whatever you like in, but specifically designed for CI/CD. I created a simple config script that checks out my project code, builds, and runs the mocha test suite. It will 'fail' the build for a failure in the connection to github, an npm build failure, or any failing test. The script then invokes my test coverage and reporting scripts to automatically keep my coverage stats up to date.
 
