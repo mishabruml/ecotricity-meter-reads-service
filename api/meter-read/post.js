@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const validatePostBody = require("../../src/validation/post/validatePostBody");
 const validatePostIdempotency = require("../../src/validation/post/validatePostIdempotency");
 const validateDataUniqueness = require("../../src/validation/post/validateDataUniqueness");
+const readingModelController = new (require("../../src/db/controllers/readingModelController"))();
 
 const {
   ValidationError,
@@ -34,7 +35,8 @@ const post = async (req, res) => {
       const reading = body;
       reading.idempotencyKey = idempotencyKey;
 
-      const entry = await ReadingModel.create(reading);
+      const entry = await readingModelController.insertReading(reading);
+      // const entry = await ReadingModel.create(reading);
       res.status(201);
       res.send(entry);
     }
