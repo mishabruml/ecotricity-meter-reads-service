@@ -137,7 +137,7 @@ curl -X POST \
 }'
 ```
 
-This will respond with status code 201 and body JSON with the created resource:
+This will respond with status code 201 and body JSON with the created resource (meter reading).
 
 ```JSON
 {
@@ -164,7 +164,62 @@ This will respond with status code 201 and body JSON with the created resource:
 }
 ```
 
-Note that the server returns the full mongodb document, with all fields. This is really for developers, its useful to quickly be able to reference the document in the database at a later time. 
+Note that the server returns the full mongodb document, with all fields. The `_id` field is really for developers, it's useful to quickly be able to reference the document in the database at a later time. 
+
+#### Invalid requests
+
+The system will handle invalid data and respond appropriately. 
+
+##### Absent properties
+Each of the following body properties: `[customerId, serialNumber, mpxn, read, readDate]` is **required** and if absent, the server will respond with a response code 400 and an appropriate message; for example, sending a meter reading that is missing the `serialNumber` will respond;
+
+`400: ValidationError: data should have required property 'serialNumber'`
+
+##### Invalid formatting
+Each of the required fields must be formatted as per the schema spec- see schema section in [System Design](#system-design). Any requests sent with invalid formatting will respond with a status code 400 and appropriate message. For example, sending a meter reading with `"customerId":"12345"` (not a uuid string) will respond:
+
+`400: ValidationError: data.customerId should match format "uuid"`
+
+Sending a reading with `"mpxn":1` (and constant `MPXN_LENGTH` set to 8, for example) will respond 
+
+`400: ValidationError: data.mpxn should NOT be shorter than 8 characters, data.mpxn should match pattern "^\w{8}$"`
+
+Sending a reading with a `read` value sent as a string `"value":"1234"` rather than a number `"value":1234` will respond:
+
+`400: ValidationError: data.read[0].value should be number`
+
+Sending a reading with a `read` value outwith the limits specified in constants.js, for example  `"value": 10000` will respond:
+
+`400: ValidationError: data.read[0].value should be <= 9999`
+
+##### Idempotency
+
+For information about how this system is implemented, see the Idempotency section in [System Design](#system-design)
+
+###### Idempotency-Key header
+
+Sending a POST with a missing Idempotency-Key header will respond:
+
+`400: ValidationError: Request header Idempotency-Key data should be string`
+
+Sending a POST with an Idempotency-Key header that is not a uuid, e.g.
+
+```bash
+curl -X POST \
+  http://localhost:3000/meter-read \
+  -H 'Content-Type: application/json' \
+  -H 'Idempotency-Key: 12345' \
+```
+Response: `400: ValidationError: Request header Idempotency-Key data should match format "uuid"`
+
+Sending a POST with an Idempotency-Key header that matches an existing key in the database, i.e. un-idempotent will respond:
+
+`409: IdempotencyError: Found existing record(s) matching the idempotency key c56c88e4-3f1c-46dc-8993-539ddde73630`
+
+Sending a POST twice without changing the body, but changing the `Idempotency-Key` to a new uuid will respond: 
+
+`409: DuplicateError: Found existing record(s) matching the provided data {"customerId":"ffec5567-3314-4e7cb2a8-45456832762a","serialNumber":"12345678910","mpxn":"12345678","read:[{"type":"ANYTIME","registerId":"NWemRz","value":9999},{"type":"NIGHT","registerId":"NWemRz","value":3389}],"readDate":"2018-11-29T07:34:10.649Z"}`
+
 
 ## System Design <a name="system-design"></a>
 
@@ -205,6 +260,8 @@ The "root" or "common" schema looks like this (pseudocode):
 *NB: in the db there will also be mongodb native `_id` and `_v` fields, not shown here.* 
 
 The string lengths (number of characters) and some other properties about the schema are not hardcoded; they can be controlled with constants set in `/src/lib/constants.js`
+
+The `read` object expects exactly one of each "reading" per `REQUIRED_READ_TYPES` as specced in constants. That means that if the developer later decided that each `read` now requires a third reading type, `"DAY"`, for example, they could just add it to the array in `REQUIRED_READ_TYPES` and the schema would be adjusted dynamically.
 
 I chose to add two fields to the schema. `idempotencyKey` is used to control POST request idempotency, as explained in the next section. `createdAt` is a field automatically created by MongoDB at the document creation time; it is therefore not required in the POST body. The `createdAt` date could be used for lots of useful things, such as determining when a customer *submitted* a reading, rather than when then the reading was taken from the meter, or in debugging - timestamps on errors in the server logs could be correlated with `createdAt` to find out if a bug was caused by creating a particular document.
 
