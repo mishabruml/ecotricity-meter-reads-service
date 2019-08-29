@@ -104,7 +104,7 @@ If no matching meter reading(s) cannot be found, the API responds with status 40
 
 ### POST /meter-read
 
-Endpoint used for putting new meter readings into the database. The reading data is sent via JSON in the POST body, and is strictly validated against the schema. The POST is also checked for idempotency and uniqueness- see the Idempotency section in [System Design](#system-design)
+Endpoint used for putting new meter readings into the database. The reading data is sent via JSON in the POST body, and is strictly validated against the schema. The POST is also checked for idempotency and uniqueness- see the Idempotency section in [System Design](#system-design). Finding it fiddly to come up with unique POST bodies or arduous to generate "authentic" random customer data? Don't worry, I've written a tool to do it for you! See the Dev Tools section in [Developers](developers). You'll need to have the system set up locally, though. 
 
 The POST expects a request header `Idempotency-Key` which must be a `uuid`. Set your header in curl with the `-H` flag, you'll need to generate a uuid though. You could use [https://www.guidgenerator.com/](https://www.guidgenerator.com/) or something similar. My preferred method, however, is to send the requests in Postman, set the `Idempotency-Key` header, and use the `{{guid}}` global variable as the value. This will generate a `uuid` for you at runtime (when you hit send)
 
@@ -220,6 +220,49 @@ Sending a POST twice without changing the body, but changing the `Idempotency-Ke
 
 `409: DuplicateError: Found existing record(s) matching the provided data {"customerId":"ffec5567-3314-4e7cb2a8-45456832762a","serialNumber":"12345678910","mpxn":"12345678","read:[{"type":"ANYTIME","registerId":"NWemRz","value":9999},{"type":"NIGHT","registerId":"NWemRz","value":3389}],"readDate":"2018-11-29T07:34:10.649Z"}`
 
+## Developers <a name="developers"></a>
+
+### Local build 
+
+Requirements: `git`, `node`, `npm`, [Now](https://zeit.co/docs) - although shipped as a dev-dependency, you made need to install it yourself globally to run the CLI properly: `npm i -g now`
+
+You need a `.env` file in the project root directory. This has the connection string to the database, and the codecov token for uploading code coverage reports. Contact mishabruml at gmail dot com if you would these keys! You could also create your own `.env` file pointing to your own mongodb and codecov account. You could, for instance, spin up a local mongodb server and point the local application to that, for your own testing. 
+
+```
+.env:
+	PROD_DB_URI=db.connection-string.com/mydb
+	CODECOV_TOKEN=*******
+```
+
+Useful: `mongo` (local db server), `Postman` (API testing)
+
+Clone the repository with `git clone`
+Install the dependencies with `npm install`
+To start the local development server, type `npm run local`, or  `now dev` if you have Now installed globally, or `npx now dev` if not. These are all equivalent. 
+
+This will start up a local development server on `localhost`! Default is port 3000- I think you can specify this if you like, check the Now docs. You should now be able to hit your local server with Postman or whatever to test the API.
+
+### Testing
+
+The unit testing suite is written in Mocha, and is reasonably extensive. It tests the schemas, data validation libraries, custom error classes and the database controller. I wrote a random reading generator factory/library using [Chance.js](https://chancejs.com/) to create simulated (valid) submitted meter reading objects. I use this for example in testing validation; generate a reading, then swap a valid property for a (known) invalid one, run the validation on the data, and assert that the right bit of invalid data was caught. 
+
+You can run single tests by using `mocha .only` on `describes`, and run with with `npm test`, or run the whole suite with `npm run test:all`
+
+You can run a test coverage report with `npm run test-coverage`. This will output the report to console, and also output to `.nyc_output`.
+
+
+### Dev Tools
+
+#### Post mock data
+
+There is a tool to POST mock/pseudo-random data to the database! Found in `src/util/helpers/postMockData.js` it could be exposed via API as a development endpoint, or more simply it can be invoked with `npm run post-mock-data`
+
+You will need the connection string in `.env` to use it. It makes use of the generateRandomReading library discussed above, to generate a complete (random) POST request from an imaginary user, complete with a valid `Idempotency-Key`, it then calls the POST method with this data and sends the data to the database. Usefully, the data send to the database is logged to console, so it can be inspected by the developer. This is the really useful if you'd like to test the GET endpoint but don't know what data is in the database; simply create a new record with this tool and the you have all the data you need, in the database, ready to test the GET endpoint. 
+
+#### Cloc
+
+There is a tool to get stats on the codebase, using [cloc](http://cloc.sourceforge.net/). 
+Run `npm run cloc`to run the report and view it in the console. At the time of the writing, the codebase is 35 files, 3797 lines of code.
 
 ## System Design <a name="system-design"></a>
 
