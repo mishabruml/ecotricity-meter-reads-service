@@ -22,7 +22,7 @@ const validatePostIdempotency = async idempotencyKey => {
     // console.log("idk invalid");
     // console.error(ajv.errors);
     throw new ValidationError(
-      `idempotency-key header ${ajv.errorsText()}`,
+      `Request header Idempotency-Key ${ajv.errorsText()}`,
       (ajvErrors = ajv.errors)
     );
   }

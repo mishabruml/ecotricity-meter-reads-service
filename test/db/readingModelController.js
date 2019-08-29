@@ -1,6 +1,8 @@
 const ReadingModelController = require("../../src/db/controllers/readingModelController");
 const ReadingModel = require("../../src/db/models/readingModel");
 
+const generateRandomReading = require("../util/generateRandomReading");
+
 const { expect } = require("chai");
 
 const sinon = require("sinon");
@@ -44,5 +46,27 @@ describe("ReadingModel db controller class", async () => {
     findMock.restore();
 
     expect(result).to.deep.eql({ idempotencyKey, _id });
+  });
+
+  it("should insert a reading into the db", async () => {
+    // create some seed data
+    const data = generateRandomReading();
+
+    const reading = data.body;
+
+    // Mock (stub) the model native create command to return the seed data
+    const createMock = sinon.mock(ReadingModel);
+
+    createMock
+      .expects("create")
+      .withArgs(reading)
+      .resolves(reading);
+
+    // call the controller methods with the mocked 'find'
+    const result = await readingModelController.insertReading(reading);
+
+    createMock.restore();
+
+    expect(result).to.deep.eql(reading);
   });
 });

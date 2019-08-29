@@ -50,4 +50,8 @@ module.exports = class ReadingModelController {
       .sort(this.sortBySettings)
       .lean();
   }
+
+  async insertReading(data) {
+    return await ReadingModel.create(data);
+  }
 };

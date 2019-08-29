@@ -17,7 +17,7 @@ const postMockData = async () => {
       console.log("POST response code: ", code);
     },
     send: result => {
-      console.log("POST went OK!");
+      console.log("POST mock data went OK!");
       console.log(result); // log the created resource to the console
     }
   };
