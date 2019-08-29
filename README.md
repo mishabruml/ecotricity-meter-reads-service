@@ -100,11 +100,11 @@ If a matching meter reading can be found, the API responds with a status 200 and
 ]
 ```
 
-If a matching meter reading cannot be found, the API responds with status 404 and body: `No reading(s) found for query {"customerId":"ffec5567-3314-4e7c-b2a8-45456832762a"}`
+If no matching meter reading(s) cannot be found, the API responds with status 404 and body: `No reading(s) found for query {"customerId":"ffec5567-3314-4e7c-b2a8-45456832762a"}`
 
 ### POST /meter-read
 
-Endpoint used for putting new meter readings into the database. The reading data is sent via JSON in the POST body, and is strictly validated against the schema. The POST is also checked for idempotency and uniqueness- see the Idempotency section in [System Design](#system-design)
+Endpoint used for putting new meter readings into the database. The reading data is sent via JSON in the POST body, and is strictly validated against the schema. The POST is also checked for idempotency and uniqueness- see the Idempotency section in [System Design](#system-design). Finding it fiddly to come up with unique POST bodies or arduous to generate "authentic" random customer data? Don't worry, I've written a tool to do it for you! See the Dev Tools section in [Developers](developers). You'll need to have the system set up locally, though. 
 
 The POST expects a request header `Idempotency-Key` which must be a `uuid`. Set your header in curl with the `-H` flag, you'll need to generate a uuid though. You could use [https://www.guidgenerator.com/](https://www.guidgenerator.com/) or something similar. My preferred method, however, is to send the requests in Postman, set the `Idempotency-Key` header, and use the `{{guid}}` global variable as the value. This will generate a `uuid` for you at runtime (when you hit send)
 
@@ -137,7 +137,7 @@ curl -X POST \
 }'
 ```
 
-This will respond with status code 201 and body JSON with the created resource:
+This will respond with status code 201 and body JSON with the created resource (meter reading).
 
 ```JSON
 {
@@ -164,7 +164,105 @@ This will respond with status code 201 and body JSON with the created resource:
 }
 ```
 
-Note that the server returns the full mongodb document, with all fields. This is really for developers, its useful to quickly be able to reference the document in the database at a later time. 
+Note that the server returns the full mongodb document, with all fields. The `_id` field is really for developers, it's useful to quickly be able to reference the document in the database at a later time. 
+
+#### Invalid requests
+
+The system will handle invalid data and respond appropriately. 
+
+##### Absent properties
+Each of the following body properties: `[customerId, serialNumber, mpxn, read, readDate]` is **required** and if absent, the server will respond with a response code 400 and an appropriate message; for example, sending a meter reading that is missing the `serialNumber` will respond;
+
+`400: ValidationError: data should have required property 'serialNumber'`
+
+##### Invalid formatting
+Each of the required fields must be formatted as per the schema spec- see schema section in [System Design](#system-design). Any requests sent with invalid formatting will respond with a status code 400 and appropriate message. For example, sending a meter reading with `"customerId":"12345"` (not a uuid string) will respond:
+
+`400: ValidationError: data.customerId should match format "uuid"`
+
+Sending a reading with `"mpxn":1` (and constant `MPXN_LENGTH` set to 8, for example) will respond 
+
+`400: ValidationError: data.mpxn should NOT be shorter than 8 characters, data.mpxn should match pattern "^\w{8}$"`
+
+Sending a reading with a `read` value sent as a string `"value":"1234"` rather than a number `"value":1234` will respond:
+
+`400: ValidationError: data.read[0].value should be number`
+
+Sending a reading with a `read` value outwith the limits specified in constants.js, for example  `"value": 10000` will respond:
+
+`400: ValidationError: data.read[0].value should be <= 9999`
+
+##### Idempotency
+
+For information about how this system is implemented, see the Idempotency section in [System Design](#system-design)
+
+###### Idempotency-Key header
+
+Sending a POST with a missing Idempotency-Key header will respond:
+
+`400: ValidationError: Request header Idempotency-Key data should be string`
+
+Sending a POST with an Idempotency-Key header that is not a uuid, e.g.
+
+```bash
+curl -X POST \
+  http://localhost:3000/meter-read \
+  -H 'Content-Type: application/json' \
+  -H 'Idempotency-Key: 12345' \
+```
+Response: `400: ValidationError: Request header Idempotency-Key data should match format "uuid"`
+
+Sending a POST with an Idempotency-Key header that matches an existing key in the database, i.e. un-idempotent will respond:
+
+`409: IdempotencyError: Found existing record(s) matching the idempotency key c56c88e4-3f1c-46dc-8993-539ddde73630`
+
+Sending a POST twice without changing the body, but changing the `Idempotency-Key` to a new uuid will respond: 
+
+`409: DuplicateError: Found existing record(s) matching the provided data {"customerId":"ffec5567-3314-4e7cb2a8-45456832762a","serialNumber":"12345678910","mpxn":"12345678","read:[{"type":"ANYTIME","registerId":"NWemRz","value":9999},{"type":"NIGHT","registerId":"NWemRz","value":3389}],"readDate":"2018-11-29T07:34:10.649Z"}`
+
+## Developers <a name="developers"></a>
+
+### Local build 
+
+Requirements: `git`, `node`, `npm`, [Now](https://zeit.co/docs) - although shipped as a dev-dependency, you made need to install it yourself globally to run the CLI properly: `npm i -g now`
+
+You need a `.env` file in the project root directory. This has the connection string to the database, and the codecov token for uploading code coverage reports. Contact mishabruml at gmail dot com if you would these keys! You could also create your own `.env` file pointing to your own mongodb and codecov account. You could, for instance, spin up a local mongodb server and point the local application to that, for your own testing. 
+
+```
+.env:
+	PROD_DB_URI=db.connection-string.com/mydb
+	CODECOV_TOKEN=*******
+```
+
+Useful: `mongo` (local db server), `Postman` (API testing)
+
+Clone the repository with `git clone`
+Install the dependencies with `npm install`
+To start the local development server, type `npm run local`, or  `now dev` if you have Now installed globally, or `npx now dev` if not. These are all equivalent. 
+
+This will start up a local development server on `localhost`! Default is port 3000- I think you can specify this if you like, check the Now docs. You should now be able to hit your local server with Postman or whatever to test the API.
+
+### Testing
+
+The unit testing suite is written in Mocha, and is reasonably extensive. It tests the schemas, data validation libraries, custom error classes and the database controller. I wrote a random reading generator factory/library using [Chance.js](https://chancejs.com/) to create simulated (valid) submitted meter reading objects. I use this for example in testing validation; generate a reading, then swap a valid property for a (known) invalid one, run the validation on the data, and assert that the right bit of invalid data was caught. 
+
+You can run single tests by using `mocha .only` on `describes`, and run with with `npm test`, or run the whole suite with `npm run test:all`
+
+You can run a test coverage report with `npm run test-coverage`. This will output the report to console, and also output to `.nyc_output`.
+
+
+### Dev Tools
+
+#### Post mock data
+
+There is a tool to POST mock/pseudo-random data to the database! Found in `src/util/helpers/postMockData.js` it could be exposed via API as a development endpoint, or more simply it can be invoked with `npm run post-mock-data`
+
+You will need the connection string in `.env` to use it. It makes use of the generateRandomReading library discussed above, to generate a complete (random) POST request from an imaginary user, complete with a valid `Idempotency-Key`, it then calls the POST method with this data and sends the data to the database. Usefully, the data send to the database is logged to console, so it can be inspected by the developer. This is the really useful if you'd like to test the GET endpoint but don't know what data is in the database; simply create a new record with this tool and the you have all the data you need, in the database, ready to test the GET endpoint. 
+
+#### Cloc
+
+There is a tool to get stats on the codebase, using [cloc](http://cloc.sourceforge.net/). 
+Run `npm run cloc`to run the report and view it in the console. At the time of the writing, the codebase is 35 files, 3797 lines of code.
 
 ## System Design <a name="system-design"></a>
 
@@ -178,7 +276,15 @@ I chose the persistence layer to be MongoDB, mostly because I am familiar with i
 
 ### Schema
 
-My final schema looks like this (pseudocode):
+I wrote a couple of different schemas for different use cases/consumption by different modules, but consistency across them is ensured by `src/lib/constants`
+
+The schemas for validating incoming data with `ajv` (JSON schema validation library), can be found in `src/lib/schemas`. 
+
+There are different schema for POST and GET bodies because the GET request accepts a subset of the fields. I used subschema for each field, and constants, to compile the "parent" schemas, ensure consistency between the two schema. 
+
+The [mongoose schema](https://mongoosejs.com/docs/guide.html) I defined for db-level validation by mongodb can be found in `src/db/models/readingModel.js`. Strictly speaking, in this file I am exporting not the schema, but the *model*, compiled from the schema with the mongoose driver, as this is more practical for use elsewhere in the codebase. 
+
+The "root" or "common" schema looks like this (pseudocode):
 
 ```
 {
@@ -198,7 +304,9 @@ My final schema looks like this (pseudocode):
 
 The string lengths (number of characters) and some other properties about the schema are not hardcoded; they can be controlled with constants set in `/src/lib/constants.js`
 
-I chose to add two fields to the schema. `idempotencyKey` is used to control POST request idempotency, as explained in the next section. `createdAt` is a field automatically created by MongoDB at the document creation time; it is therefore not required in the POST body. The createdAt date could be used for lots of useful things, such as determining when a customer *submitted* a reading, rather than when then the reading was taken from the meter, or in debugging - timestamps on errors in the server logs could be correlated with `createdAt` to find out if a bug was caused by creating a particular document.
+The `read` object expects exactly one of each "reading" per `REQUIRED_READ_TYPES` as specced in constants. That means that if the developer later decided that each `read` now requires a third reading type, `"DAY"`, for example, they could just add it to the array in `REQUIRED_READ_TYPES` and the schema would be adjusted dynamically.
+
+I chose to add two fields to the schema. `idempotencyKey` is used to control POST request idempotency, as explained in the next section. `createdAt` is a field automatically created by MongoDB at the document creation time; it is therefore not required in the POST body. The `createdAt` date could be used for lots of useful things, such as determining when a customer *submitted* a reading, rather than when then the reading was taken from the meter, or in debugging - timestamps on errors in the server logs could be correlated with `createdAt` to find out if a bug was caused by creating a particular document.
 
 ### Idempotency 
 
@@ -212,7 +320,7 @@ The second idempotency problem manifests as "client accidently sending exactly t
 
 This codebase is hosted on github, which was chosen because I am really comfortable with it. I used it's features extensively, even for a team of 1 (me) things like PR's were really handy.
 
-One of the great things about Now, is the out-the-box continuous deployments when configured with github; Now sits on top of github as a github 'app' and deploys my app for me. `master` and `dev` branches have special status, as the master branch deploys to my main production environment and URL, and `dev` to a dev environment, but also *any* feature branch is deployed at it's own staging url. This is super handy for development and allowed me to move really fast and hassle-free, and allowed regular testing of the API in a deployed context.
+The app is deployed to Now platform; one of the great things about Now, is the out-the-box continuous deployments when configured with github; Now sits on top of github as a github 'app' and deploys my app for me. `master` and `dev` branches have special status, as the master branch deploys to my main production environment and URL, and `dev` to a dev environment, but also *any* feature branch is deployed at it's own staging url. This is super handy for development and allowed me to move really fast and hassle-free, and allowed regular testing of the API in a deployed context.
 
 The test suite is written in [mocha](https://mochajs.org/) see test section for more on that specifically. Code coverage is provided by [nyc/istanbul](https://istanbul.js.org/), and the reporting is provided by [codecov](https://codecov.io/). I wrote some npm scripts (see `package.json`) to test my code, run a coverage report, and upload it to my Codecov account. This can be linked to my github repo, which is what me gives me my shiny coverage % badge, at the top of this page!
 
@@ -296,5 +404,5 @@ Seems like registerId is used to identify the rate/measurement/units of the valu
 - Pass in parameters to customise the query as query strings. Parameters should be validated in the same fashion as in the POST method; create a validation library that can shared across both (all) API methods.
 - Query parameters:
   - customerId: get all the reading(s) for a specific customerId.
-  - serialNumber: get all the reading(s) for a specifc meter. Compicated by the fact that "uniqueness cannot be assured"
+  - serialNumber: get all the reading(s) for a specific meter. Complicated by the fact that "uniqueness cannot be assured"
 - Present all readings for all customers if no customerId is specified
