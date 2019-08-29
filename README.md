@@ -212,7 +212,7 @@ curl -X POST \
 ```
 Response: `400: ValidationError: Request header Idempotency-Key data should match format "uuid"`
 
-Sending a POST with an Idempotency-Key header that matches an existing key in the database, i.e. un-idempotent will respond:
+Sending a duplicate POST i.e. with an Idempotency-Key header that matches an existing key in the database will respond:
 
 `409: IdempotencyError: Found existing record(s) matching the idempotency key c56c88e4-3f1c-46dc-8993-539ddde73630`
 
@@ -226,7 +226,7 @@ Sending a POST twice without changing the body, but changing the `Idempotency-Ke
 
 Requirements: `git`, `node`, `npm`, [Now](https://zeit.co/docs) - although shipped as a dev-dependency, you made need to install it yourself globally to run the CLI properly: `npm i -g now`
 
-You need a `.env` file in the project root directory. This has the connection string to the database, and the codecov token for uploading code coverage reports. Contact mishabruml at gmail dot com if you would these keys! You could also create your own `.env` file pointing to your own mongodb and codecov account. You could, for instance, spin up a local mongodb server and point the local application to that, for your own testing. 
+You need a `.env` file in the project root directory. This has the connection string to the database, and the codecov token for uploading code coverage reports. Contact mishabruml at gmail dot com if you would like a copy of these keys! You could also create your own `.env` file pointing to your own mongodb and codecov account. You could, for instance, spin up a local mongodb server and point the local application to that, for your own testing. 
 
 ```
 .env:
@@ -257,7 +257,7 @@ You can run a test coverage report with `npm run test-coverage`. This will outpu
 
 There is a tool to POST mock/pseudo-random data to the database! Found in `src/util/helpers/postMockData.js` it could be exposed via API as a development endpoint, or more simply it can be invoked with `npm run post-mock-data`
 
-You will need the connection string in `.env` to use it. It makes use of the generateRandomReading library discussed above, to generate a complete (random) POST request from an imaginary user, complete with a valid `Idempotency-Key`, it then calls the POST method with this data and sends the data to the database. Usefully, the data send to the database is logged to console, so it can be inspected by the developer. This is the really useful if you'd like to test the GET endpoint but don't know what data is in the database; simply create a new record with this tool and the you have all the data you need, in the database, ready to test the GET endpoint. 
+You will need the connection string in `.env` to use it. It makes use of the generateRandomReading library discussed above, to generate a complete (random) POST request from an imaginary user, complete with a valid `Idempotency-Key`, it then calls the POST method with this data and sends the data to the database. Usefully, the data sent to the database is logged to console, so it can be inspected by the developer. This is the really useful if you'd like to test the GET endpoint but don't know what data is in the database; simply create a new record with this tool and the you have all the data you need, in the database, ready to test the GET endpoint. 
 
 #### Cloc
 
@@ -310,7 +310,7 @@ I chose to add two fields to the schema. `idempotencyKey` is used to control POS
 
 ### Idempotency 
 
-Two measures were taken against idempotency in the POST route; the thing I wanted to avoid was creating the same resource twice for exactly the same request. 
+Two measures were taken to ensure idempotency for the POST route; the thing I wanted to avoid was creating the same resource twice for exactly the same request. 
 
 The "network duplication idempotency" problem manifests as exactly the same request hitting the POST route twice, caused by a network error/lag/automatic retry or similar. The request is identical in every way. I solved this problem by adding an `idempotencyKey` to my schema; every meter reading that is created expects a unique key. I chose `guid` as my key, as its guaranteed to be unique, commonly used, and easy to work with. The `idempotencyKey` is set as a header in the POST request, **and so must be generated at the time of sending by the client**. When the request hits the server, the key is checked against entries in the db, and if no matches are found, the request is assumed to be genuinely unique, and is processes.
 
@@ -322,7 +322,7 @@ This codebase is hosted on github, which was chosen because I am really comforta
 
 The app is deployed to Now platform; one of the great things about Now, is the out-the-box continuous deployments when configured with github; Now sits on top of github as a github 'app' and deploys my app for me. `master` and `dev` branches have special status, as the master branch deploys to my main production environment and URL, and `dev` to a dev environment, but also *any* feature branch is deployed at it's own staging url. This is super handy for development and allowed me to move really fast and hassle-free, and allowed regular testing of the API in a deployed context.
 
-The test suite is written in [mocha](https://mochajs.org/) see test section in [developers](#developers) for more on that specifically. Code coverage is provided by [nyc/istanbul](https://istanbul.js.org/), and the reporting is provided by [codecov](https://codecov.io/). I wrote some npm scripts (see `package.json`) to test my code, run a coverage report, and upload it to my Codecov account. This can be linked to my github repo, which is what me gives me my shiny coverage % badge, at the top of this page!
+The test suite is written in [mocha](https://mochajs.org/) see test section in [developers](#developers) for more on that specifically. Code coverage is provided by [nyc/istanbul](https://istanbul.js.org/), and the reporting is provided by [codecov](https://codecov.io/). I wrote some npm scripts (see `package.json`) to test my code, run a coverage report, and upload it to my Codecov account. This can be linked to my github repo, which is what gives me my shiny codecov coverage % badge, at the top of this page!
 
 The thing missing from Now was automated testing (and any other automation); so I set it up myself with [circleci](https://circleci.com/). Another free service, this is essentially Cloud-based linux containers/VMs to run whatever you like in, but specifically designed for CI/CD. I created a simple config script that checks out my project code, builds, and runs the mocha test suite. It will 'fail' the build for a failure in the connection to github, an npm build failure, or any failing test. The script then invokes my test coverage and reporting scripts to automatically keep my coverage stats up to date.
 
