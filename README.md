@@ -100,7 +100,7 @@ If a matching meter reading can be found, the API responds with a status 200 and
 ]
 ```
 
-If a matching meter reading cannot be found, the API responds with status 404 and body: `No reading(s) found for query {"customerId":"ffec5567-3314-4e7c-b2a8-45456832762a"}`
+If no matching meter reading(s) cannot be found, the API responds with status 404 and body: `No reading(s) found for query {"customerId":"ffec5567-3314-4e7c-b2a8-45456832762a"}`
 
 ### POST /meter-read
 
