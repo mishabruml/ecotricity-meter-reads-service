@@ -178,7 +178,15 @@ I chose the persistence layer to be MongoDB, mostly because I am familiar with i
 
 ### Schema
 
-My final schema looks like this (pseudocode):
+I wrote a couple of different schemas for different use cases/consumption by different modules, but consistency across them is ensured by `src/lib/constants`
+
+The schemas for validating incoming data with `ajv` (JSON schema validation library), can be found in `src/lib/schemas`. 
+
+There are different schema for POST and GET bodies because the GET request accepts a subset of the fields. I used subschema for each field, and constants, to compile the "parent" schemas, ensure consistency between the two schema. 
+
+The [mongoose schema](https://mongoosejs.com/docs/guide.html) I defined for db-level validation by mongodb can be found in `src/db/models/readingModel.js`. Strictly speaking, in this file I am exporting not the schema, but the *model*, compiled from the schema with the mongoose driver, as this is more practical for use elsewhere in the codebase. 
+
+The "root" or "common" schema looks like this (pseudocode):
 
 ```
 {
@@ -198,7 +206,7 @@ My final schema looks like this (pseudocode):
 
 The string lengths (number of characters) and some other properties about the schema are not hardcoded; they can be controlled with constants set in `/src/lib/constants.js`
 
-I chose to add two fields to the schema. `idempotencyKey` is used to control POST request idempotency, as explained in the next section. `createdAt` is a field automatically created by MongoDB at the document creation time; it is therefore not required in the POST body. The createdAt date could be used for lots of useful things, such as determining when a customer *submitted* a reading, rather than when then the reading was taken from the meter, or in debugging - timestamps on errors in the server logs could be correlated with `createdAt` to find out if a bug was caused by creating a particular document.
+I chose to add two fields to the schema. `idempotencyKey` is used to control POST request idempotency, as explained in the next section. `createdAt` is a field automatically created by MongoDB at the document creation time; it is therefore not required in the POST body. The `createdAt` date could be used for lots of useful things, such as determining when a customer *submitted* a reading, rather than when then the reading was taken from the meter, or in debugging - timestamps on errors in the server logs could be correlated with `createdAt` to find out if a bug was caused by creating a particular document.
 
 ### Idempotency 
 
@@ -212,7 +220,7 @@ The second idempotency problem manifests as "client accidently sending exactly t
 
 This codebase is hosted on github, which was chosen because I am really comfortable with it. I used it's features extensively, even for a team of 1 (me) things like PR's were really handy.
 
-One of the great things about Now, is the out-the-box continuous deployments when configured with github; Now sits on top of github as a github 'app' and deploys my app for me. `master` and `dev` branches have special status, as the master branch deploys to my main production environment and URL, and `dev` to a dev environment, but also *any* feature branch is deployed at it's own staging url. This is super handy for development and allowed me to move really fast and hassle-free, and allowed regular testing of the API in a deployed context.
+The app is deployed to Now platform; one of the great things about Now, is the out-the-box continuous deployments when configured with github; Now sits on top of github as a github 'app' and deploys my app for me. `master` and `dev` branches have special status, as the master branch deploys to my main production environment and URL, and `dev` to a dev environment, but also *any* feature branch is deployed at it's own staging url. This is super handy for development and allowed me to move really fast and hassle-free, and allowed regular testing of the API in a deployed context.
 
 The test suite is written in [mocha](https://mochajs.org/) see test section for more on that specifically. Code coverage is provided by [nyc/istanbul](https://istanbul.js.org/), and the reporting is provided by [codecov](https://codecov.io/). I wrote some npm scripts (see `package.json`) to test my code, run a coverage report, and upload it to my Codecov account. This can be linked to my github repo, which is what me gives me my shiny coverage % badge, at the top of this page!
 
@@ -296,5 +304,5 @@ Seems like registerId is used to identify the rate/measurement/units of the valu
 - Pass in parameters to customise the query as query strings. Parameters should be validated in the same fashion as in the POST method; create a validation library that can shared across both (all) API methods.
 - Query parameters:
   - customerId: get all the reading(s) for a specific customerId.
-  - serialNumber: get all the reading(s) for a specifc meter. Compicated by the fact that "uniqueness cannot be assured"
+  - serialNumber: get all the reading(s) for a specific meter. Complicated by the fact that "uniqueness cannot be assured"
 - Present all readings for all customers if no customerId is specified
