@@ -34,7 +34,7 @@
     "chai-shallow-deep-equal": "^1.4.6",
     "chance": "^1.0.18",
     "cloc": "^2.5.0",
-    "codecov": "^3.5.0",
+    "codecov": "^3.7.1",
     "dotenv": "^8.1.0",
     "mocha": "^6.2.0",
     "now": "^16.1.2",
