@@ -26,7 +26,7 @@
   },
   "homepage": "https://github.com/mishabruml/ecotricity-meter-reads-service#readme",
   "dependencies": {
-    "ajv": "^6.10.2",
+    "ajv": "^6.12.3",
     "mongoose": "^5.7.5"
   },
   "devDependencies": {
